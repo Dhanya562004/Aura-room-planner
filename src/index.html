@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - AI-Powered 3D Interior Design Planner</title>
+    <meta name="description" content="Design your dream room in 2D and 3D with Aura, the AI-powered interior design assistant and planner. Manage layout, catalog items, and styles.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons Font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="./styles/main.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 1. LOADING OVERLAY -->
+    <div id="loading-overlay" class="overlay-modal hidden">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <h3>Loading 3D Assets...</h3>
+            <p id="loading-text">0% loaded</p>
+            <div class="progress-bar-container">
+                <div id="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DASHBOARD / WELCOME OVERLAY -->
+    <div id="dashboard-overlay" class="dashboard-screen">
+        <div class="dashboard-header">
+            <div class="logo">
+                <i class="fa-solid fa-wand-magic-sparkles logo-icon"></i>
+                <h1>AURA</h1>
+                <span>AI Interior Designer</span>
+            </div>
+            <div class="header-actions">
+                <button id="btn-api-key-header" class="btn btn-secondary">
+                    <i class="fa-solid fa-key"></i> Gemini API Key
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- Left Panel: Project Manager -->
+            <div class="dashboard-panel project-panel">
+                <h2><i class="fa-solid fa-folder-open"></i> My Design Projects</h2>
+                <div class="project-list-container">
+                    <div id="project-list" class="project-list">
+                        <!-- Dynamically populated -->
+                        <div class="empty-state">
+                            <i class="fa-solid fa-box-open empty-icon"></i>
+                            <p>No saved projects yet. Start with a template or a blank design!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="new-project-action">
+                    <button id="btn-new-blank" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-plus"></i> Create Blank Design
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Design Templates -->
+            <div class="dashboard-panel template-panel">
+                <h2><i class="fa-solid fa-cubes"></i> Choose a Room Template</h2>
+                <p class="section-subtitle">Start with a professionally styled, pre-arranged room layout.</p>
+                <div class="template-grid">
+                    <div class="template-card" data-template="bedroom">
+                        <div class="template-img-placeholder bedroom-placeholder">
+                            <i class="fa-solid fa-bed template-icon"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Cozy Bedroom</h3>
+                            <p>Includes a double bed, workspace desk, shelving, reading lamp, and natural biophilic accents.</p>
+                            <span class="badge">9 Items Placed</span>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-template="living">
+                        <div class="template-img-placeholder living-placeholder">
+                            <i class="fa-solid fa-couch template-icon"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Modern Living Room</h3>
+                            <p>Features a spacious lounge sofa, coffee table, widescreen television setup, and accent armchair.</p>
+                            <span class="badge">8 Items Placed</span>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-template="office">
+                        <div class="template-img-placeholder office-placeholder">
+                            <i class="fa-solid fa-briefcase template-icon"></i>
+                        </div>
+                        <div class="template-info">
+                            <h3>Professional Office</h3>
+                            <p>Equipped with a large executive desk, screen setup, visitor chairs, and book cabinets.</p>
+                            <span class="badge">9 Items Placed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. WORKSPACE VIEW -->
+    <div id="workspace-container" class="workspace-screen hidden">
+        <!-- Sidebar Navigation & Content Panel -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles logo-icon"></i>
+                    <h2>Aura 3D</h2>
+                </div>
+                <button id="btn-dashboard-home" class="btn btn-icon" title="Go to Dashboard">
+                    <i class="fa-solid fa-house"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation Tabs -->
+            <nav class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="tab-editor" title="Editor Controls">
+                    <i class="fa-solid fa-pen-ruler"></i>
+                    <span>Editor</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-catalog" title="Furniture Catalog">
+                    <i class="fa-solid fa-couch"></i>
+                    <span>Catalog</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-materials" title="Materials & Textures">
+                    <i class="fa-solid fa-brush"></i>
+                    <span>Materials</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-ai" title="AI Assistant">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>AI Assistant</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-settings" title="Settings & Exports">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Panels -->
+            <div class="sidebar-content">
+                <!-- 3.1 Editor Tab -->
+                <div id="tab-editor" class="tab-panel active">
+                    <h3>Editor Controls</h3>
+                    <div class="panel-section">
+                        <h4>2D Floorplanner Mode</h4>
+                        <div class="button-group-vertical">
+                            <button id="btn-mode-move" class="btn btn-secondary active">
+                                <i class="fa-solid fa-arrows-up-down-left-right"></i> Move Walls & Corners
+                            </button>
+                            <button id="btn-mode-draw" class="btn btn-secondary">
+                                <i class="fa-solid fa-pencil"></i> Draw New Walls
+                            </button>
+                            <button id="btn-mode-transform" class="btn btn-secondary">
+                                <i class="fa-solid fa-crop-simple"></i> Edit / Split Walls
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h4>Snap & Grid Settings</h4>
+                        <div class="form-group flex-row">
+                            <label for="input-snap-grid">Snap to Grid</label>
+                            <input type="checkbox" id="input-snap-grid" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="range-grid-spacing">Grid Spacing (cm)</label>
+                            <div class="range-value-container">
+                                <input type="range" id="range-grid-spacing" min="10" max="200" value="50">
+                                <span id="val-grid-spacing">50 cm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="context-corner">
+                        <h4>Selected Corner</h4>
+                        <div class="form-group">
+                            <label for="range-corner-elevation">Elevation (cm)</label>
+                            <input type="range" id="range-corner-elevation" min="50" max="500" value="250">
+                            <span id="val-corner-elevation">250 cm</span>
+                        </div>
+                        <button id="btn-delete-corner" class="btn btn-danger btn-sm w-100">Delete Corner</button>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="context-wall">
+                        <h4>Selected Wall</h4>
+                        <div class="form-group">
+                            <label for="range-wall-thickness">Thickness (cm)</label>
+                            <input type="range" id="range-wall-thickness" min="10" max="100" value="20">
+                            <span id="val-wall-thickness">20 cm</span>
+                        </div>
+                        <button id="btn-delete-wall" class="btn btn-danger btn-sm w-100">Delete Wall</button>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="context-room">
+                        <h4>Selected Room Area</h4>
+                        <div class="form-group">
+                            <label for="input-room-name">Room Name</label>
+                            <input type="text" id="input-room-name" placeholder="E.g. Living Room">
+                        </div>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="context-item">
+                        <h4>Selected Furniture</h4>
+                        <p id="val-selected-item-name" class="highlight-text">No Item Selected</p>
+                        <div class="button-group flex-row">
+                            <button id="btn-rotate-item-left" class="btn btn-secondary btn-sm" title="Rotate Left">
+                                <i class="fa-solid fa-rotate-left"></i> Rotate L
+                            </button>
+                            <button id="btn-rotate-item-right" class="btn btn-secondary btn-sm" title="Rotate Right">
+                                <i class="fa-solid fa-rotate-right"></i> Rotate R
+                            </button>
+                        </div>
+                        <button id="btn-delete-item" class="btn btn-danger btn-sm w-100 mt-2">Delete Furniture</button>
+                    </div>
+                </div>
+
+                <!-- 3.2 Catalog Tab -->
+                <div id="tab-catalog" class="tab-panel">
+                    <h3>Furniture Library</h3>
+                    <p class="panel-intro">Browse catalog categories and click items to spawn them in your room.</p>
+                    <div id="catalog-accordion" class="catalog-accordion">
+                        <!-- Catalog Categories populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- 3.3 Materials Tab -->
+                <div id="tab-materials" class="tab-panel">
+                    <h3>Materials & Colors</h3>
+                    <p class="panel-intro">Select textures or custom colors for the selected wall or room floor.</p>
+
+                    <div class="panel-section">
+                        <h4>1. Select a Room/Wall</h4>
+                        <p class="help-text">Click a room floor or wall in the 3D Viewer to activate styling.</p>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="materials-room-context">
+                        <h4>Floor Textures</h4>
+                        <div class="texture-grid" id="floor-texture-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="picker-floor-color">Floor Accent Tint</label>
+                            <input type="color" id="picker-floor-color" value="#FFFFFF">
+                        </div>
+                    </div>
+
+                    <div class="panel-section selection-context hidden" id="materials-wall-context">
+                        <h4>Wall Textures</h4>
+                        <div class="texture-grid" id="wall-texture-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="picker-wall-color">Wall Paint Tint</label>
+                            <input type="color" id="picker-wall-color" value="#FFFFFF">
+                        </div>
+
+                        <h4 class="mt-4">Wall Additions</h4>
+                        <div class="form-group flex-row justify-between align-center">
+                            <label for="select-door-wall">Select Door Type</label>
+                            <button id="btn-add-door-wall" class="btn btn-primary btn-sm">Add Door</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.4 AI Assistant Tab -->
+                <div id="tab-ai" class="tab-panel flex-column h-100">
+                    <h3>AI Design Consultant</h3>
+                    
+                    <!-- Theme Selector inside Chat -->
+                    <div class="style-selector-container">
+                        <label for="chat-style-select">Style Theme:</label>
+                        <select id="chat-style-select">
+                            <option value="Modern">Modern Modernism</option>
+                            <option value="Minimalist" selected>Warm Minimalist</option>
+                            <option value="Scandinavian">Scandinavian Hygge</option>
+                            <option value="Traditional">Classic Traditional</option>
+                        </select>
+                    </div>
+
+                    <!-- Chat Messages Stream -->
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message system">
+                            <div class="message-sender">Aura Assistant</div>
+                            <div class="message-text">
+                                Hello! I'm Aura, your AI design specialist. Ask me anything about layout, color palettes, or furniture placements!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Actions -->
+                    <div class="chat-input-area">
+                        <div class="quick-prompts-slider">
+                            <button class="quick-prompt-btn" data-prompt="Suggest a color palette for my room">🎨 Paint Scheme</button>
+                            <button class="quick-prompt-btn" data-prompt="How can I improve my current layout?">📐 Layout Audit</button>
+                            <button class="quick-prompt-btn" data-prompt="What furniture additions would complete this style?">🛋️ Recommendations</button>
+                        </div>
+                        <div class="chat-input-row">
+                            <textarea id="chat-input" placeholder="Type design query..."></textarea>
+                            <button id="btn-chat-send" class="btn btn-primary" title="Send Message">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.5 Settings Tab -->
+                <div id="tab-settings" class="tab-panel">
+                    <h3>Settings & Export</h3>
+                    
+                    <div class="panel-section">
+                        <h4>Project Storage</h4>
+                        <div class="form-group">
+                            <label for="input-project-name">Project Name</label>
+                            <input type="text" id="input-project-name" value="My Project">
+                        </div>
+                        <div class="button-group flex-row">
+                            <button id="btn-save-project-settings" class="btn btn-primary w-50">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Design
+                            </button>
+                            <button id="btn-reset-project-settings" class="btn btn-secondary w-50">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Blank
+                            </button>
+                        </div>
+                        <p id="save-status-text" class="status-success-text hidden mt-2">Saved to LocalStorage!</p>
+                    </div>
+
+                    <div class="panel-section">
+                        <h4>Render Quality</h4>
+                        <div class="form-group flex-row justify-between align-center">
+                            <label for="toggle-shadows">High-Quality Shadows</label>
+                            <input type="checkbox" id="toggle-shadows" checked>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h4>Export Options</h4>
+                        <div class="button-group-vertical">
+                            <button id="btn-export-png" class="btn btn-secondary">
+                                <i class="fa-solid fa-image"></i> Export View as PNG Image
+                            </button>
+                            <button id="btn-export-gltf" class="btn btn-secondary">
+                                <i class="fa-solid fa-file-export"></i> Export 3D Model (GLTF)
+                            </button>
+                            <button id="btn-export-zip" class="btn btn-secondary">
+                                <i class="fa-solid fa-file-zipper"></i> Export Full Project (ZIP)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <h4>AI Configuration</h4>
+                        <button id="btn-api-key-settings" class="btn btn-secondary w-100">
+                            <i class="fa-solid fa-key"></i> Setup Gemini API Key
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Display Canvas Area -->
+        <main class="canvas-area">
+            <div id="bp3d-js-app" class="full-canvas-wrapper">
+                <div id="bp3djs-viewer2d" class="canvas-layer"></div>
+                <div id="bp3djs-viewer3d" class="canvas-layer"></div>
+            </div>
+
+            <!-- Floating View Toolbar -->
+            <div class="view-toolbar">
+                <button id="btn-toggle-view" class="btn btn-primary shadow-lg btn-view-toggle">
+                    <i class="fa-solid fa-circle-half-stroke"></i> Switch to 3D View
+                </button>
+            </div>
+
+            <!-- Floating Room Status Badge -->
+            <div class="room-status-badge">
+                <span id="room-status-name">Living Room Planning</span>
+                <span id="room-status-dimensions">5.0m x 5.0m</span>
+            </div>
+
+            <!-- Smart AI Recommendation Overlay Banner -->
+            <div id="ai-rec-banner" class="ai-rec-banner hidden">
+                <div class="ai-rec-banner-content">
+                    <div class="ai-rec-info">
+                        <span class="ai-sparkle"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Recommendation:</span>
+                        <p id="ai-rec-text">How about adding a textured area rug to ground your seating arrangement?</p>
+                    </div>
+                    <div class="ai-rec-actions">
+                        <button id="btn-apply-ai-rec" class="btn btn-primary btn-sm">Add Item</button>
+                        <button id="btn-close-ai-rec" class="btn btn-icon btn-sm"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 4. KEY CONFIGURATION MODAL -->
+    <div id="modal-api-key" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-key"></i> Gemini API Configuration</h3>
+                <button id="btn-close-key-modal" class="btn btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter your **Gemini API Key** to enable real-time, context-aware AI interior design advice.</p>
+                <div class="alert-info">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Your API key is stored locally in your browser's session storage and is never sent to any server except directly to Google's Gemini API endpoints.</span>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="input-api-key">Gemini API Key</label>
+                    <input type="password" id="input-api-key" placeholder="AIzaSy...">
+                </div>
+                <p class="form-help">Don't have a key? Leave it blank to run in offline design agent simulation mode.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-save-api-key" class="btn btn-primary">Save Configuration</button>
+                <button id="btn-clear-api-key" class="btn btn-secondary">Clear Key</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries and App Module Script -->
+    <script src="./index.js" type="module"></script>
+</body>
+
+</html>
