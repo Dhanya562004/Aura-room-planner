@@ -1,78 +1,80 @@
-# Aura — AI-Powered 3D Interior Design Planner
+# Aura — Your AI-Powered 3D Interior Design Companion
 
-Aura is a state-of-the-art, interactive 3D interior design and floor planning application. It combines traditional CAD-like 2D and 3D drawing capabilities with an intelligent **AI Design Assistant** powered by Google Gemini to help you create, style, and visualize your dream living spaces.
+Ever wanted to see how a new sofa layout or a different flooring material would look in your living room before actually buying anything? Aura helps you plan, design, and visualize your spaces in an interactive web application.
 
----
-
-## 🌟 Key Features
-
-### 1. Dual-View Design Planner
-*   **2D Floorplanner Mode**: Draw walls, position windows and doors, adjust room boundaries, and calculate area dimensions in real-time. Built on top of **PixiJS** for ultra-smooth 2D rendering and manipulation.
-*   **3D Interactive Viewer**: Toggle to a fully interactive 3D environment powered by **Three.js**. Rotate, orbit, zoom, place furniture, and select textures dynamically.
-
-### 2. Aura AI Design Assistant
-*   An integrated sidebar companion powered by the **Gemini 1.5 Flash API**.
-*   **Context-Aware Analysis**: Aura scans your room type, active square footage, floor texture, and placed furniture to provide tailored interior design advice.
-*   **Interactive Meta-Triggers**: Aura doesn't just talk — it can actively suggest layout adjustments or push commands like `[TRIGGER: ADD_ITEM: Large Potted Plant]` or `[TRIGGER: SET_STYLE: Modern]` directly into the application space to assist with decorating.
-*   **Offline Fallback Mode**: Supports local simulations if a Gemini API key is not supplied.
-
-### 3. Smart Recommendation Engine
-*   **Style-Aligned Suggestions**: Pick a theme (Modern, Minimalist, Scandinavian, or Traditional) and receive real-time, context-specific recommendations.
-*   **Empty-Space Spotting**: Detects if your room is missing key design items (such as rugs, floor lamps, or plants) and suggests them with clear design rationale.
-
-### 4. Premium Dark Glassmorphism UI
-*   A stunning, modern dark-themed user interface utilizing glassmorphism styling, clean micro-animations, customizable colors, and a responsive sidebar layout.
-
-### 5. Client-Side Project Hub
-*   Directly save, rename, reload, and manage your projects from the local browser storage (`localStorage`).
+Aura bridges the gap between traditional 2D blueprint drafting and 3D interior design. Best of all, it has an integrated AI Assistant powered by Google Gemini that works alongside you to give design tips, recommend decor, and even trigger actions directly in your workspace.
 
 ---
 
-## 🛠️ Technology Stack
+## 🏗️ What you can do with Aura
 
-*   **Logic & Runtime**: Vanilla ES6 JavaScript
-*   **Styling**: Premium Custom Vanilla CSS
-*   **2D Rendering Engine**: [PixiJS](https://pixijs.com/) (with [pixi-viewport](https://github.com/davidfig/pixi-viewport))
-*   **3D Graphics Engine**: [Three.js](https://threejs.org/)
-*   **Build Tool & Bundler**: [Parcel](https://parceljs.org/)
-*   **AI Models**: Google Gemini 1.5 Flash API
+### 1. Dual-View Floor Planner
+* **2D Drafting Mode**: Quickly click and drag to draw walls, place doors and windows, resize rooms, and see square footage calculations instantly. This view is built on **PixiJS**, keeping the 2D layout interaction ultra-smooth and precise.
+* **3D Visualizer Mode**: Switch seamlessly to a 3D perspective to explore your room. Drag furniture around, rotate items, zoom, and apply different textures to the floors and walls. This view is built with **Three.js**.
+
+### 2. Meet Your AI Design Assistant
+Aura features a sidebar conversation pane powered by Google's **Gemini 1.5 Flash API**. 
+* **Contextual Suggestions**: The AI is aware of your workspace. It looks at the room's name, dimensions, current furniture items, and flooring to suggest logical next steps.
+* **Interactive Meta-Triggers**: The AI doesn't just give text advice—it can actually trigger changes in the app! For example, if you ask it to recommend furniture, it can send action commands (like `[TRIGGER: ADD_ITEM: Large Potted Plant]`) that automatically place items or apply style themes to your design.
+* **Offline Simulation**: If you don't have an API key, Aura falls back to a built-in rule-based design simulator so you can still play with the interactive suggestions.
+
+### 3. Smart Decor Recommendations
+Aura spots empty spaces or missing elements in your room design. Under the hood, a recommendation engine checks if you're missing essential items for your selected style theme (e.g. Modern, Minimalist, Scandinavian, or Traditional). It then suggests additions like area rugs, floor lamps, or indoor plants to make the space feel complete.
+
+### 4. Project Storage & Exports
+* **Local Saves**: Your layouts are stored locally in your browser's `localStorage` so you won't lose your work when you refresh.
+* **Dashboard & Templates**: Start from a blank slate, or load a pre-configured template like a *Cozy Bedroom*, *Modern Living Room*, or a *Professional Office* to see how they're structured.
+* **Flexible Exports**: Save a snapshot of your canvas as a PNG, export the scene as a 3D model (GLTF), or download the entire project structure as a ZIP file.
+
+---
+
+## 🛠️ The Tech Stack
+
+We wanted Aura to be fast, responsive, and easy to run without a heavy framework setup:
+* **Runtime & Logic**: Plain ES6 JavaScript.
+* **UI/Styles**: Custom CSS using a dark glassmorphism theme and smooth animations.
+* **Graphics Engines**: **PixiJS** (with `pixi-viewport`) for vector-based 2D interactions, and **Three.js** for the 3D scene and models.
+* **Bundler & Dev Server**: **Parcel** for extremely fast builds and hot reloading.
+* **AI Core**: Google Gemini 1.5 Flash API.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) installed (v16+ recommended) along with `npm`.
+You'll need [Node.js](https://nodejs.org/) (v16+ recommended) and `npm` installed.
 
-### Installation
-1. Clone the repository:
+### Setup and Running
+
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/Dhanya562004/Aura-room-planner.git
    cd Aura-room-planner/blueprint-js
    ```
-2. Install the package dependencies:
+
+2. **Install the dependencies**:
    ```bash
    npm install
    ```
 
-### Running Locally
-*   **Start Local Development Server**:
-    ```bash
-    npm run dev
-    ```
-    This bundles the assets and starts a local server (typically accessible at `http://localhost:1234`).
-*   **Build Production Bundle**:
-    ```bash
-    npm run build
-    ```
-    This generates optimized, production-ready files in the `dist/` directory.
+3. **Start the local development server**:
+   ```bash
+   npm run dev
+   ```
+   This will start a local server at `http://localhost:1234`. Open it in your browser to start designing.
+
+4. **Build for production**:
+   ```bash
+   npm run build
+   ```
+   This compiles and optimizes all assets into the `dist/` directory.
 
 ---
 
 ## 🤖 Activating the AI Assistant
 
-To unlock the full potential of Aura's AI capabilities:
-1. Obtain an API Key from the Google AI Studio.
-2. Click the **AI Assistant** settings button in the top right corner of the application UI.
-3. Paste your Gemini API key in the API key field.
-4. Start chatting with Aura about color palettes, spatial layouts, or decor recommendations!
+To use the live Gemini AI assistant:
+1. Head over to [Google AI Studio](https://aistudio.google.com/) and grab a free API key.
+2. In the Aura app, click the **Gemini API Key** button in the dashboard or under Settings.
+3. Paste your key. (It is stored entirely in your browser's local `sessionStorage` and is only sent directly to Google's API endpoints).
+4. Select a design theme (like Scandinavian Hygge or Warm Minimalist) and start chatting!
