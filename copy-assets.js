@@ -3,7 +3,7 @@ const path = require('path');
 
 function copyFolderSync(from, to) {
     if (!fs.existsSync(from)) {
-        console.log(`Source folder does not exist: ${from}`);
+        console.log(`❌ Not found: ${from}`);
         return;
     }
     if (!fs.existsSync(to)) {
@@ -21,28 +21,19 @@ function copyFolderSync(from, to) {
     });
 }
 
-// Destination directory
 const distDir = path.join(__dirname, 'dist');
 
-console.log('--- Starting Assets Copying ---');
+console.log('--- Copying Assets ---');
 
-// ✅ ADD THIS (IMPORTANT FIX)
-console.log('Copying icons...');
+// 🔥 FIX: Try BOTH possible locations
+copyFolderSync(path.join(__dirname, 'src', 'icons'), path.join(distDir, 'icons'));
 copyFolderSync(path.join(__dirname, 'demo', 'icons'), path.join(distDir, 'icons'));
+copyFolderSync(path.join(__dirname, 'demo', 'assets', 'icons'), path.join(distDir, 'icons'));
 
-// Copy textures
-console.log('Copying textures...');
 copyFolderSync(path.join(__dirname, 'demo', 'textures'), path.join(distDir, 'textures'));
-
-// Copy assets
-console.log('Copying assets...');
 copyFolderSync(path.join(__dirname, 'demo', 'assets'), path.join(distDir, 'assets'));
 
-// Copy models
-console.log('Copying demo models...');
 copyFolderSync(path.join(__dirname, 'demo', 'models'), path.join(distDir, 'models'));
-
-console.log('Copying catalog models...');
 copyFolderSync(path.join(__dirname, 'models'), path.join(distDir, 'models'));
 
-console.log('--- Assets Copy Completed Successfully ---');
+console.log('--- Done ---');
