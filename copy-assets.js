@@ -3,7 +3,7 @@ const path = require('path');
 
 function copyFolderSync(from, to) {
     if (!fs.existsSync(from)) {
-        console.log(`❌ Not found: ${from}`);
+        console.log(`❌ Missing: ${from}`);
         return;
     }
     if (!fs.existsSync(to)) {
@@ -25,15 +25,16 @@ const distDir = path.join(__dirname, 'dist');
 
 console.log('--- Copying Assets ---');
 
-// 🔥 FIX: Try BOTH possible locations
-copyFolderSync(path.join(__dirname, 'src', 'icons'), path.join(distDir, 'icons'));
-copyFolderSync(path.join(__dirname, 'demo', 'icons'), path.join(distDir, 'icons'));
-copyFolderSync(path.join(__dirname, 'demo', 'assets', 'icons'), path.join(distDir, 'icons'));
+// ✅ ONLY THIS PATH IS NEEDED (your correct one)
+copyFolderSync(
+    path.join(__dirname, 'demo', 'icons'),
+    path.join(distDir, 'icons')
+);
 
+// keep your existing assets
 copyFolderSync(path.join(__dirname, 'demo', 'textures'), path.join(distDir, 'textures'));
 copyFolderSync(path.join(__dirname, 'demo', 'assets'), path.join(distDir, 'assets'));
-
 copyFolderSync(path.join(__dirname, 'demo', 'models'), path.join(distDir, 'models'));
 copyFolderSync(path.join(__dirname, 'models'), path.join(distDir, 'models'));
 
-console.log('--- Done ---');
+console.log('--- DONE ---');
