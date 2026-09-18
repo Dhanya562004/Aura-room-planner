@@ -26,6 +26,10 @@ const distDir = path.join(__dirname, 'dist');
 
 console.log('--- Starting Assets Copying ---');
 
+// ✅ ADD THIS (IMPORTANT FIX)
+console.log('Copying icons...');
+copyFolderSync(path.join(__dirname, 'demo', 'icons'), path.join(distDir, 'icons'));
+
 // Copy textures
 console.log('Copying textures...');
 copyFolderSync(path.join(__dirname, 'demo', 'textures'), path.join(distDir, 'textures'));
@@ -34,7 +38,7 @@ copyFolderSync(path.join(__dirname, 'demo', 'textures'), path.join(distDir, 'tex
 console.log('Copying assets...');
 copyFolderSync(path.join(__dirname, 'demo', 'assets'), path.join(distDir, 'assets'));
 
-// Copy models (from both demo/models and root models/)
+// Copy models
 console.log('Copying demo models...');
 copyFolderSync(path.join(__dirname, 'demo', 'models'), path.join(distDir, 'models'));
 
