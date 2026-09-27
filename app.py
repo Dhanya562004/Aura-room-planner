@@ -71,20 +71,190 @@ def sanitize_items_list(items_list):
             result.append(clean)
     return result
 
+# ---------------------------------------------------------
+# CONSTANTS & PRESETS
+# ---------------------------------------------------------
+THEMES = {
+    "⚡ Nike Performance Studio": {
+        "bg": "#0B0E14", "accent": "#CCFF00", "wall": "#1E293B",
+        "description": "High-contrast athletic precision aesthetic with hyper-lime accents."
+    },
+    "🎮 Cyberpunk Sanctuary": {
+        "bg": "#0D0814", "accent": "#FF007F", "wall": "#2A1B3D",
+        "description": "Futuristic neon atmosphere designed for immersive creation and gaming."
+    },
+    "💼 Executive Modern Office": {
+        "bg": "#0F172A", "accent": "#38BDF8", "wall": "#334155",
+        "description": "Sleek, productive walnut and slate minimalist executive layout."
+    },
+    "🌿 Japandi Zen Suite": {
+        "bg": "#121512", "accent": "#A3E635", "wall": "#273027",
+        "description": "Harmonious blend of Japanese minimalism and Scandinavian warmth."
+    },
+    "🏠 Compact Urban Studio": {
+        "bg": "#18181B", "accent": "#FBBF24", "wall": "#3F3F46",
+        "description": "Smart spatial efficiency layout for modern compact living."
+    }
+}
+
+ITEM_CATALOG = [
+    # Workstation
+    {"name": "Ergonomic Desk", "category": "Workstation", "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 450, "zone": "Work"},
+    {"name": "Pro Mesh Chair", "category": "Workstation", "w": 0.7, "d": 0.7, "color": "#818CF8", "price": 350, "zone": "Work"},
+    {"name": "Dual Monitor Arm", "category": "Workstation", "w": 0.8, "d": 0.3, "color": "#94A3B8", "price": 180, "zone": "Work"},
+    {"name": "Bookshelf Storage", "category": "Storage", "w": 1.2, "d": 0.4, "color": "#F59E0B", "price": 280, "zone": "Storage"},
+    
+    # Seating & Relaxation
+    {"name": "Modular Lounge Sofa", "category": "Seating", "w": 2.2, "d": 0.9, "color": "#EC4899", "price": 850, "zone": "Lounge"},
+    {"name": "Accent Armchair", "category": "Seating", "w": 0.9, "d": 0.8, "color": "#F472B6", "price": 320, "zone": "Lounge"},
+    {"name": "Coffee Table", "category": "Seating", "w": 1.1, "d": 0.6, "color": "#FB7185", "price": 210, "zone": "Lounge"},
+    
+    # Fitness & Performance
+    {"name": "Nike Recovery Bench", "category": "Fitness", "w": 1.4, "d": 0.6, "color": "#CCFF00", "price": 400, "zone": "Fitness"},
+    {"name": "Athletic Dumbbell Rack", "category": "Fitness", "w": 1.0, "d": 0.5, "color": "#A3E635", "price": 300, "zone": "Fitness"},
+    {"name": "Interactive Smart Mirror", "category": "Fitness", "w": 0.8, "d": 0.2, "color": "#4ADE80", "price": 950, "zone": "Fitness"},
+    
+    # Decor & Lighting
+    {"name": "Ambient LED Arc Lamp", "category": "Lighting", "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 160, "zone": "Decor"},
+    {"name": "Indoor Monstera Plant", "category": "Decor", "w": 0.6, "d": 0.6, "color": "#10B981", "price": 90, "zone": "Decor"},
+    {"name": "Acoustic Wall Panel", "category": "Decor", "w": 1.5, "d": 0.1, "color": "#64748B", "price": 220, "zone": "Decor"},
+    {"name": "Minimalist Area Rug", "category": "Decor", "w": 2.5, "d": 1.8, "color": "#475569", "price": 250, "zone": "Decor"}
+]
+
+PRESET_LAYOUTS = {
+    "⚡ Nike Athletic Performance Studio": {
+        "room": {"width": 6.0, "length": 5.0, "height": 2.8},
+        "style": "⚡ Nike Performance Studio",
+        "budget": 3500,
+        "door": {"wall": "South", "pos": 2.5, "width": 1.0},
+        "window": {"wall": "North", "pos": 2.0, "width": 2.0},
+        "items": [
+            {"id": 101, "name": "Ergonomic Desk", "category": "Workstation", "x": 1.2, "y": 3.8, "w": 1.6, "d": 0.8, "rotation": 0, "color": "#38BDF8", "price": 450, "zone": "Work"},
+            {"id": 102, "name": "Pro Mesh Chair", "category": "Workstation", "x": 1.6, "y": 2.8, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 350, "zone": "Work"},
+            {"id": 103, "name": "Nike Recovery Bench", "category": "Fitness", "x": 4.2, "y": 3.5, "w": 1.4, "d": 0.6, "rotation": 90, "color": "#CCFF00", "price": 400, "zone": "Fitness"},
+            {"id": 104, "name": "Interactive Smart Mirror", "category": "Fitness", "x": 5.5, "y": 2.5, "w": 0.8, "d": 0.2, "rotation": 90, "color": "#4ADE80", "price": 950, "zone": "Fitness"},
+            {"id": 105, "name": "Indoor Monstera Plant", "category": "Decor", "x": 0.6, "y": 0.6, "w": 0.6, "d": 0.6, "rotation": 0, "color": "#10B981", "price": 90, "zone": "Decor"},
+            {"id": 106, "name": "Ambient LED Arc Lamp", "category": "Lighting", "x": 0.5, "y": 4.2, "w": 0.5, "d": 0.5, "rotation": 0, "color": "#FBBF24", "price": 160, "zone": "Decor"}
+        ]
+    },
+    "🎮 Cyberpunk Creator Sanctuary": {
+        "room": {"width": 5.5, "length": 4.5, "height": 2.6},
+        "style": "🎮 Cyberpunk Sanctuary",
+        "budget": 4000,
+        "door": {"wall": "West", "pos": 1.5, "width": 0.9},
+        "window": {"wall": "East", "pos": 2.0, "width": 1.5},
+        "items": [
+            {"id": 201, "name": "Ergonomic Desk", "category": "Workstation", "x": 2.5, "y": 3.6, "w": 1.8, "d": 0.8, "rotation": 0, "color": "#FF007F", "price": 550, "zone": "Work"},
+            {"id": 202, "name": "Pro Mesh Chair", "category": "Workstation", "x": 3.0, "y": 2.6, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 380, "zone": "Work"},
+            {"id": 203, "name": "Modular Lounge Sofa", "category": "Seating", "x": 1.2, "y": 1.0, "w": 2.0, "d": 0.9, "rotation": 0, "color": "#EC4899", "price": 850, "zone": "Lounge"},
+            {"id": 204, "name": "Acoustic Wall Panel", "category": "Decor", "x": 2.5, "y": 4.4, "w": 2.0, "d": 0.1, "rotation": 0, "color": "#64748B", "price": 220, "zone": "Decor"},
+            {"id": 205, "name": "Bookshelf Storage", "category": "Storage", "x": 4.5, "y": 1.0, "w": 0.8, "d": 0.4, "rotation": 90, "color": "#F59E0B", "price": 280, "zone": "Storage"}
+        ]
+    },
+    "💼 Executive Modern Office": {
+        "room": {"width": 6.5, "length": 5.5, "height": 3.0},
+        "style": "💼 Executive Modern Office",
+        "budget": 5000,
+        "door": {"wall": "South", "pos": 3.0, "width": 1.0},
+        "window": {"wall": "North", "pos": 2.5, "width": 2.5},
+        "items": [
+            {"id": 301, "name": "Ergonomic Desk", "category": "Workstation", "x": 2.5, "y": 4.2, "w": 2.0, "d": 0.9, "rotation": 0, "color": "#38BDF8", "price": 750, "zone": "Work"},
+            {"id": 302, "name": "Pro Mesh Chair", "category": "Workstation", "x": 3.1, "y": 3.2, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 450, "zone": "Work"},
+            {"id": 303, "name": "Accent Armchair", "category": "Seating", "x": 1.0, "y": 1.5, "w": 0.9, "d": 0.8, "rotation": 45, "color": "#F472B6", "price": 350, "zone": "Lounge"},
+            {"id": 304, "name": "Bookshelf Storage", "category": "Storage", "x": 5.8, "y": 2.5, "w": 1.4, "d": 0.4, "rotation": 90, "color": "#F59E0B", "price": 420, "zone": "Storage"},
+            {"id": 305, "name": "Indoor Monstera Plant", "category": "Decor", "x": 5.8, "y": 4.8, "w": 0.6, "d": 0.6, "rotation": 0, "color": "#10B981", "price": 120, "zone": "Decor"}
+        ]
+    }
+}
+
+# ---------------------------------------------------------
+# SAFE STATE GETTERS & SETTERS (BULLETPROOF STATE ENGINE)
+# ---------------------------------------------------------
+def get_items():
+    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
+        default_preset = PRESET_LAYOUTS["⚡ Nike Athletic Performance Studio"]
+        st.session_state.items = sanitize_items_list(default_preset["items"])
+    else:
+        st.session_state.items = sanitize_items_list(st.session_state.items)
+    return st.session_state.items
+
+def set_items(new_items):
+    if not isinstance(new_items, list):
+        st.session_state.items = []
+    else:
+        st.session_state.items = sanitize_items_list(new_items)
+
+def get_room_dim():
+    if "room_dim" not in st.session_state or not isinstance(st.session_state.room_dim, dict):
+        st.session_state.room_dim = {"width": 6.0, "length": 5.0, "height": 2.8}
+    r = st.session_state.room_dim
+    r["width"] = max(3.0, min(15.0, safe_float(r.get("width"), 6.0)))
+    r["length"] = max(3.0, min(15.0, safe_float(r.get("length"), 5.0)))
+    r["height"] = max(2.2, min(6.0, safe_float(r.get("height"), 2.8)))
+    return r
+
+def get_current_style():
+    if "current_style" not in st.session_state or not isinstance(st.session_state.current_style, str):
+        st.session_state.current_style = "⚡ Nike Performance Studio"
+    if st.session_state.current_style not in THEMES:
+        st.session_state.current_style = "⚡ Nike Performance Studio"
+    return st.session_state.current_style
+
+def get_door():
+    if "door" not in st.session_state or not isinstance(st.session_state.door, dict):
+        st.session_state.door = {"wall": "South", "pos": 2.5, "width": 1.0}
+    d = st.session_state.door
+    d["wall"] = str(d.get("wall", "South"))
+    d["pos"] = safe_float(d.get("pos"), 2.5)
+    d["width"] = safe_float(d.get("width"), 1.0)
+    return d
+
+def get_window():
+    if "window" not in st.session_state or not isinstance(st.session_state.window, dict):
+        st.session_state.window = {"wall": "North", "pos": 2.0, "width": 2.0}
+    w = st.session_state.window
+    w["wall"] = str(w.get("wall", "North"))
+    w["pos"] = safe_float(w.get("pos"), 2.0)
+    w["width"] = safe_float(w.get("width"), 2.0)
+    return w
+
+def get_budget():
+    if "budget" not in st.session_state:
+        st.session_state.budget = 3500
+    st.session_state.budget = max(1000, safe_int(st.session_state.budget, 3500))
+    return st.session_state.budget
+
+def get_chat_history():
+    if "chat_history" not in st.session_state or not isinstance(st.session_state.chat_history, list):
+        st.session_state.chat_history = [
+            {
+                "role": "assistant",
+                "content": "⚡ **AURA AI Studio Co-Pilot active.** I am ready to help you optimize room flow, add items, adjust dimensions, and elevate your spatial design. Try asking: *'Add a standing desk near the window'* or *'Optimize layout for ergonomic score'*."
+            }
+        ]
+    return st.session_state.chat_history
+
+def get_action_log():
+    if "action_log" not in st.session_state or not isinstance(st.session_state.action_log, list):
+        st.session_state.action_log = ["Studio session initialized with Nike Performance Preset."]
+    return st.session_state.action_log
+
+def get_snapshots():
+    if "snapshots" not in st.session_state or not isinstance(st.session_state.snapshots, list):
+        st.session_state.snapshots = []
+    return st.session_state.snapshots
+
 def get_gemini_api_key():
     """Retrieve Gemini API key from session state, env vars, or Streamlit secrets."""
-    # 1. Check session state (user manual input in sidebar)
     if st.session_state.get("user_gemini_key"):
         key = str(st.session_state["user_gemini_key"]).strip()
         if key:
             return key
             
-    # 2. Check environment variables
     for env_var in ["GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_KEY"]:
         if os.environ.get(env_var):
             return os.environ.get(env_var).strip()
             
-    # 3. Check Streamlit secrets (Cloud / local secrets.toml)
     try:
         if hasattr(st, "secrets") and st.secrets:
             if "GEMINI_API_KEY" in st.secrets:
@@ -105,6 +275,17 @@ def get_gemini_api_key():
         pass
         
     return ""
+
+# Initialize State
+get_items()
+get_room_dim()
+get_current_style()
+get_door()
+get_window()
+get_budget()
+get_chat_history()
+get_action_log()
+get_snapshots()
 
 # ---------------------------------------------------------
 # PAGE CONFIGURATION & NIKE-LEVEL LUXURY DARK DESIGN SYSTEM
@@ -300,176 +481,32 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# CONSTANTS & PRESETS
-# ---------------------------------------------------------
-THEMES = {
-    "⚡ Nike Performance Studio": {
-        "bg": "#0B0E14", "accent": "#CCFF00", "wall": "#1E293B",
-        "description": "High-contrast athletic precision aesthetic with hyper-lime accents."
-    },
-    "🎮 Cyberpunk Sanctuary": {
-        "bg": "#0D0814", "accent": "#FF007F", "wall": "#2A1B3D",
-        "description": "Futuristic neon atmosphere designed for immersive creation and gaming."
-    },
-    "💼 Executive Modern Office": {
-        "bg": "#0F172A", "accent": "#38BDF8", "wall": "#334155",
-        "description": "Sleek, productive walnut and slate minimalist executive layout."
-    },
-    "🌿 Japandi Zen Suite": {
-        "bg": "#121512", "accent": "#A3E635", "wall": "#273027",
-        "description": "Harmonious blend of Japanese minimalism and Scandinavian warmth."
-    },
-    "🏠 Compact Urban Studio": {
-        "bg": "#18181B", "accent": "#FBBF24", "wall": "#3F3F46",
-        "description": "Smart spatial efficiency layout for modern compact living."
-    }
-}
-
-ITEM_CATALOG = [
-    # Workstation
-    {"name": "Ergonomic Desk", "category": "Workstation", "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 450, "zone": "Work"},
-    {"name": "Pro Mesh Chair", "category": "Workstation", "w": 0.7, "d": 0.7, "color": "#818CF8", "price": 350, "zone": "Work"},
-    {"name": "Dual Monitor Arm", "category": "Workstation", "w": 0.8, "d": 0.3, "color": "#94A3B8", "price": 180, "zone": "Work"},
-    {"name": "Bookshelf Storage", "category": "Storage", "w": 1.2, "d": 0.4, "color": "#F59E0B", "price": 280, "zone": "Storage"},
-    
-    # Seating & Relaxation
-    {"name": "Modular Lounge Sofa", "category": "Seating", "w": 2.2, "d": 0.9, "color": "#EC4899", "price": 850, "zone": "Lounge"},
-    {"name": "Accent Armchair", "category": "Seating", "w": 0.9, "d": 0.8, "color": "#F472B6", "price": 320, "zone": "Lounge"},
-    {"name": "Coffee Table", "category": "Seating", "w": 1.1, "d": 0.6, "color": "#FB7185", "price": 210, "zone": "Lounge"},
-    
-    # Fitness & Performance
-    {"name": "Nike Recovery Bench", "category": "Fitness", "w": 1.4, "d": 0.6, "color": "#CCFF00", "price": 400, "zone": "Fitness"},
-    {"name": "Athletic Dumbbell Rack", "category": "Fitness", "w": 1.0, "d": 0.5, "color": "#A3E635", "price": 300, "zone": "Fitness"},
-    {"name": "Interactive Smart Mirror", "category": "Fitness", "w": 0.8, "d": 0.2, "color": "#4ADE80", "price": 950, "zone": "Fitness"},
-    
-    # Decor & Lighting
-    {"name": "Ambient LED Arc Lamp", "category": "Lighting", "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 160, "zone": "Decor"},
-    {"name": "Indoor Monstera Plant", "category": "Decor", "w": 0.6, "d": 0.6, "color": "#10B981", "price": 90, "zone": "Decor"},
-    {"name": "Acoustic Wall Panel", "category": "Decor", "w": 1.5, "d": 0.1, "color": "#64748B", "price": 220, "zone": "Decor"},
-    {"name": "Minimalist Area Rug", "category": "Decor", "w": 2.5, "d": 1.8, "color": "#475569", "price": 250, "zone": "Decor"}
-]
-
-PRESET_LAYOUTS = {
-    "⚡ Nike Athletic Performance Studio": {
-        "room": {"width": 6.0, "length": 5.0, "height": 2.8},
-        "style": "⚡ Nike Performance Studio",
-        "budget": 3500,
-        "door": {"wall": "South", "pos": 2.5, "width": 1.0},
-        "window": {"wall": "North", "pos": 2.0, "width": 2.0},
-        "items": [
-            {"id": 101, "name": "Ergonomic Desk", "category": "Workstation", "x": 1.2, "y": 3.8, "w": 1.6, "d": 0.8, "rotation": 0, "color": "#38BDF8", "price": 450, "zone": "Work"},
-            {"id": 102, "name": "Pro Mesh Chair", "category": "Workstation", "x": 1.6, "y": 2.8, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 350, "zone": "Work"},
-            {"id": 103, "name": "Nike Recovery Bench", "category": "Fitness", "x": 4.2, "y": 3.5, "w": 1.4, "d": 0.6, "rotation": 90, "color": "#CCFF00", "price": 400, "zone": "Fitness"},
-            {"id": 104, "name": "Interactive Smart Mirror", "category": "Fitness", "x": 5.5, "y": 2.5, "w": 0.8, "d": 0.2, "rotation": 90, "color": "#4ADE80", "price": 950, "zone": "Fitness"},
-            {"id": 105, "name": "Indoor Monstera Plant", "category": "Decor", "x": 0.6, "y": 0.6, "w": 0.6, "d": 0.6, "rotation": 0, "color": "#10B981", "price": 90, "zone": "Decor"},
-            {"id": 106, "name": "Ambient LED Arc Lamp", "category": "Lighting", "x": 0.5, "y": 4.2, "w": 0.5, "d": 0.5, "rotation": 0, "color": "#FBBF24", "price": 160, "zone": "Decor"}
-        ]
-    },
-    "🎮 Cyberpunk Creator Sanctuary": {
-        "room": {"width": 5.5, "length": 4.5, "height": 2.6},
-        "style": "🎮 Cyberpunk Sanctuary",
-        "budget": 4000,
-        "door": {"wall": "West", "pos": 1.5, "width": 0.9},
-        "window": {"wall": "East", "pos": 2.0, "width": 1.5},
-        "items": [
-            {"id": 201, "name": "Ergonomic Desk", "category": "Workstation", "x": 2.5, "y": 3.6, "w": 1.8, "d": 0.8, "rotation": 0, "color": "#FF007F", "price": 550, "zone": "Work"},
-            {"id": 202, "name": "Pro Mesh Chair", "category": "Workstation", "x": 3.0, "y": 2.6, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 380, "zone": "Work"},
-            {"id": 203, "name": "Modular Lounge Sofa", "category": "Seating", "x": 1.2, "y": 1.0, "w": 2.0, "d": 0.9, "rotation": 0, "color": "#EC4899", "price": 850, "zone": "Lounge"},
-            {"id": 204, "name": "Acoustic Wall Panel", "category": "Decor", "x": 2.5, "y": 4.4, "w": 2.0, "d": 0.1, "rotation": 0, "color": "#64748B", "price": 220, "zone": "Decor"},
-            {"id": 205, "name": "Bookshelf Storage", "category": "Storage", "x": 4.5, "y": 1.0, "w": 0.8, "d": 0.4, "rotation": 90, "color": "#F59E0B", "price": 280, "zone": "Storage"}
-        ]
-    },
-    "💼 Executive Modern Office": {
-        "room": {"width": 6.5, "length": 5.5, "height": 3.0},
-        "style": "💼 Executive Modern Office",
-        "budget": 5000,
-        "door": {"wall": "South", "pos": 3.0, "width": 1.0},
-        "window": {"wall": "North", "pos": 2.5, "width": 2.5},
-        "items": [
-            {"id": 301, "name": "Ergonomic Desk", "category": "Workstation", "x": 2.5, "y": 4.2, "w": 2.0, "d": 0.9, "rotation": 0, "color": "#38BDF8", "price": 750, "zone": "Work"},
-            {"id": 302, "name": "Pro Mesh Chair", "category": "Workstation", "x": 3.1, "y": 3.2, "w": 0.7, "d": 0.7, "rotation": 0, "color": "#818CF8", "price": 450, "zone": "Work"},
-            {"id": 303, "name": "Accent Armchair", "category": "Seating", "x": 1.0, "y": 1.5, "w": 0.9, "d": 0.8, "rotation": 45, "color": "#F472B6", "price": 350, "zone": "Lounge"},
-            {"id": 304, "name": "Bookshelf Storage", "category": "Storage", "x": 5.8, "y": 2.5, "w": 1.4, "d": 0.4, "rotation": 90, "color": "#F59E0B", "price": 420, "zone": "Storage"},
-            {"id": 305, "name": "Indoor Monstera Plant", "category": "Decor", "x": 5.8, "y": 4.8, "w": 0.6, "d": 0.6, "rotation": 0, "color": "#10B981", "price": 120, "zone": "Decor"}
-        ]
-    }
-}
-
-# ---------------------------------------------------------
-# SESSION STATE INITIALIZATION
-# ---------------------------------------------------------
-def init_session_state():
-    default_preset = PRESET_LAYOUTS["⚡ Nike Athletic Performance Studio"]
-    if "room_dim" not in st.session_state:
-        st.session_state.room_dim = {
-            "width": safe_float(default_preset["room"]["width"], 6.0),
-            "length": safe_float(default_preset["room"]["length"], 5.0),
-            "height": safe_float(default_preset["room"]["height"], 2.8)
-        }
-    if "current_style" not in st.session_state:
-        st.session_state.current_style = str(default_preset["style"])
-    if "items" not in st.session_state:
-        st.session_state.items = sanitize_items_list(default_preset["items"])
-    else:
-        st.session_state.items = sanitize_items_list(st.session_state.items)
-        
-    if "door" not in st.session_state:
-        st.session_state.door = {
-            "wall": str(default_preset["door"]["wall"]),
-            "pos": safe_float(default_preset["door"]["pos"], 2.5),
-            "width": safe_float(default_preset["door"]["width"], 1.0)
-        }
-    if "window" not in st.session_state:
-        st.session_state.window = {
-            "wall": str(default_preset["window"]["wall"]),
-            "pos": safe_float(default_preset["window"]["pos"], 2.0),
-            "width": safe_float(default_preset["window"]["width"], 2.0)
-        }
-    if "budget" not in st.session_state:
-        st.session_state.budget = safe_int(default_preset["budget"], 3500)
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = [
-            {
-                "role": "assistant",
-                "content": "⚡ **AURA AI Studio Co-Pilot active.** I am ready to help you optimize room flow, add items, adjust dimensions, and elevate your spatial design. Try asking: *'Add a standing desk near the window'* or *'Optimize layout for ergonomic score'*."
-            }
-        ]
-    if "action_log" not in st.session_state:
-        st.session_state.action_log = ["Studio session initialized with Nike Performance Preset."]
-    if "snapshots" not in st.session_state:
-        st.session_state.snapshots = []
-
-init_session_state()
-
-# ---------------------------------------------------------
 # HELPER CALCULATIONS & SPATIAL ENGINE
 # ---------------------------------------------------------
 def calculate_metrics():
-    room = st.session_state.room_dim
-    room_w = safe_float(room.get("width"), 6.0)
-    room_l = safe_float(room.get("length"), 5.0)
+    room = get_room_dim()
+    room_w = room["width"]
+    room_l = room["length"]
     
-    # Always sanitize items list to prevent float/int/str multiplication crashes
-    items = sanitize_items_list(st.session_state.get("items", []))
+    items = get_items()
     
     total_room_area = room_w * room_l
     
-    # Calculate item coverage with safe float values
-    total_item_area = sum(safe_float(item.get("w"), 1.0) * safe_float(item.get("d"), 1.0) for item in items)
+    # Calculate item coverage safely
+    total_item_area = sum(item["w"] * item["d"] for item in items)
     spatial_utilization = min(100, int((total_item_area / total_room_area) * 100)) if total_room_area > 0 else 0
     
     # Total cost
-    total_cost = sum(safe_float(item.get("price"), 0.0) for item in items)
-    target_budget = max(1.0, safe_float(st.session_state.get("budget", 3500), 3500.0))
-    budget_pct = min(100, int((total_cost / target_budget) * 100))
+    total_cost = sum(item["price"] for item in items)
+    target_budget = float(get_budget())
+    budget_pct = min(100, int((total_cost / target_budget) * 100)) if target_budget > 0 else 0
     
     # Ergonomics Score
     workstation_count = sum(1 for item in items if item.get("category") == "Workstation")
     seating_count = sum(1 for item in items if item.get("category") == "Seating")
     
-    # Spatial penalty for crowded center
     center_x, center_y = room_w / 2.0, room_l / 2.0
-    crowded_center = sum(1 for item in items if abs(safe_float(item.get("x")) - center_x) < 1.0 and abs(safe_float(item.get("y")) - center_y) < 1.0)
+    crowded_center = sum(1 for item in items if abs(item["x"] - center_x) < 1.0 and abs(item["y"] - center_y) < 1.0)
     
     ergo_score = 92
     if spatial_utilization > 50:
@@ -481,10 +518,11 @@ def calculate_metrics():
     ergo_score = max(40, min(99, int(ergo_score)))
     
     # Aesthetic Harmony Score
+    num_items = len(items)
     aesthetic_score = 88
-    if len(items) >= 4 and len(items) <= 9:
+    if num_items >= 4 and num_items <= 9:
         aesthetic_score += 8
-    elif len(items) > 12:
+    elif num_items > 12:
         aesthetic_score -= 15
     aesthetic_score = max(50, min(98, int(aesthetic_score)))
     
@@ -507,15 +545,15 @@ def calculate_metrics():
 # PLOTLY 2D FLOOR PLAN & 3D ISOMETRIC VISUALIZER
 # ---------------------------------------------------------
 def generate_2d_floorplan():
-    room = st.session_state.room_dim
-    room_w = safe_float(room.get("width"), 6.0)
-    room_l = safe_float(room.get("length"), 5.0)
+    room = get_room_dim()
+    room_w = room["width"]
+    room_l = room["length"]
     
-    items = sanitize_items_list(st.session_state.get("items", []))
-    door = st.session_state.door
-    window = st.session_state.window
+    items = get_items()
+    door = get_door()
+    window = get_window()
     
-    current_style = st.session_state.get("current_style", "⚡ Nike Performance Studio")
+    current_style = get_current_style()
     theme_info = THEMES.get(current_style, THEMES["⚡ Nike Performance Studio"])
     
     fig = go.Figure()
@@ -538,8 +576,8 @@ def generate_2d_floorplan():
     # Door Representation
     dw_color = "#FF5500"
     door_wall = door.get("wall", "South")
-    door_pos = safe_float(door.get("pos"), 2.5)
-    door_w = safe_float(door.get("width"), 1.0)
+    door_pos = door.get("pos", 2.5)
+    door_w = door.get("width", 1.0)
     
     if door_wall == "South":
         dx0, dy0, dx1, dy1 = door_pos, 0, door_pos + door_w, 0
@@ -556,8 +594,8 @@ def generate_2d_floorplan():
     # Window Representation
     win_color = "#00E5FF"
     win_wall = window.get("wall", "North")
-    win_pos = safe_float(window.get("pos"), 2.0)
-    win_w = safe_float(window.get("width"), 2.0)
+    win_pos = window.get("pos", 2.0)
+    win_w = window.get("width", 2.0)
     
     if win_wall == "North":
         wx0, wy0, wx1, wy1 = win_pos, room_l, win_pos + win_w, room_l
@@ -573,10 +611,10 @@ def generate_2d_floorplan():
     
     # Furniture & Decor Items
     for item in items:
-        x0 = safe_float(item.get("x"), 0.0)
-        y0 = safe_float(item.get("y"), 0.0)
-        x1 = x0 + safe_float(item.get("w"), 1.0)
-        y1 = y0 + safe_float(item.get("d"), 1.0)
+        x0 = item["x"]
+        y0 = item["y"]
+        x1 = x0 + item["w"]
+        y1 = y0 + item["d"]
         
         item_color = item.get("color", theme_info["accent"])
         
@@ -622,12 +660,12 @@ def generate_2d_floorplan():
     return fig
 
 def generate_3d_spatial_map():
-    room = st.session_state.room_dim
-    room_w = safe_float(room.get("width"), 6.0)
-    room_l = safe_float(room.get("length"), 5.0)
-    room_h = safe_float(room.get("height"), 2.8)
+    room = get_room_dim()
+    room_w = room["width"]
+    room_l = room["length"]
+    room_h = room["height"]
     
-    items = sanitize_items_list(st.session_state.get("items", []))
+    items = get_items()
     
     fig = go.Figure()
     
@@ -643,10 +681,10 @@ def generate_3d_spatial_map():
     
     # Draw items as 3D blocks
     for item in items:
-        x0 = safe_float(item.get("x"), 0.0)
-        y0 = safe_float(item.get("y"), 0.0)
-        x1 = x0 + safe_float(item.get("w"), 1.0)
-        y1 = y0 + safe_float(item.get("d"), 1.0)
+        x0 = item["x"]
+        y0 = item["y"]
+        x1 = x0 + item["w"]
+        y1 = y0 + item["d"]
         
         h = 0.8 if item.get("category") == "Workstation" else (0.5 if item.get("category") == "Seating" else 1.2)
         
@@ -683,9 +721,9 @@ def process_ai_request(user_prompt):
     Integrates Gemini API with fallback rule-based intelligence.
     Extracts structure: text explanation + optional JSON action commands.
     """
-    room = st.session_state.room_dim
-    items = sanitize_items_list(st.session_state.get("items", []))
-    current_style = st.session_state.get("current_style", "⚡ Nike Performance Studio")
+    room = get_room_dim()
+    items = get_items()
+    current_style = get_current_style()
     
     api_key = get_gemini_api_key()
     
@@ -762,7 +800,7 @@ Here is my spatial suggestion...
             response_text = "⚡ **AURA AI:** Added a high-performance Ergonomic Workstation aligned with optimal window lighting vectors and power routing clearance."
             json_actions = [{
                 "type": "ADD_ITEM",
-                "item": {"name": "Pro Ergonomic Desk", "category": "Workstation", "x": round(random.uniform(0.5, safe_float(room.get('width'),6.0)-2.0), 1), "y": round(random.uniform(0.5, safe_float(room.get('length'),5.0)-1.5), 1), "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 480}
+                "item": {"name": "Pro Ergonomic Desk", "category": "Workstation", "x": round(random.uniform(0.5, max(0.6, room['width']-2.0)), 1), "y": round(random.uniform(0.5, max(0.6, room['length']-1.5)), 1), "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 480}
             }]
         elif "nike" in prompt_lower or "fitness" in prompt_lower or "workout" in prompt_lower:
             response_text = "⚡ **AURA AI:** Integrated Nike Athletic Performance Recovery Zone including workout bench and interactive fitness mirror."
@@ -783,7 +821,7 @@ Here is my spatial suggestion...
             response_text = f"⚡ **AURA AI:** Analyzed your request regarding '{user_prompt}'. Recommended adding accent lighting and organizing items into dedicated zones for work, relaxation, and movement."
             json_actions = [{
                 "type": "ADD_ITEM",
-                "item": {"name": "Ambient Accent Lamp", "category": "Lighting", "x": 0.5, "y": round(safe_float(room.get('length'), 5.0)-1.0, 1), "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 150}
+                "item": {"name": "Ambient Accent Lamp", "category": "Lighting", "x": 0.5, "y": round(max(0.6, room['length']-1.0), 1), "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 150}
             }]
             
     # Execute parsed JSON actions into session state
@@ -794,9 +832,12 @@ Here is my spatial suggestion...
 def execute_actions(actions):
     if not isinstance(actions, list):
         return
-    room = st.session_state.room_dim
-    room_w = safe_float(room.get("width"), 6.0)
-    room_l = safe_float(room.get("length"), 5.0)
+    room = get_room_dim()
+    room_w = room["width"]
+    room_l = room["length"]
+    
+    items = get_items()
+    log = get_action_log()
     
     for act in actions:
         if not isinstance(act, dict):
@@ -808,33 +849,35 @@ def execute_actions(actions):
             if clean_item:
                 clean_item["x"] = max(0.2, min(room_w - clean_item["w"] - 0.2, clean_item["x"]))
                 clean_item["y"] = max(0.2, min(room_l - clean_item["d"] - 0.2, clean_item["y"]))
-                st.session_state.items.append(clean_item)
-                st.session_state.action_log.append(f"AI Action: Added item '{clean_item['name']}'")
+                items.append(clean_item)
+                log.append(f"AI Action: Added item '{clean_item['name']}'")
             
         elif atype == "REMOVE_ITEM" and "name" in act:
             target = str(act["name"]).lower()
-            st.session_state.items = [i for i in st.session_state.items if target not in str(i.get("name","")).lower()]
-            st.session_state.action_log.append(f"AI Action: Removed item matching '{act['name']}'")
+            items = [i for i in items if target not in str(i.get("name","")).lower()]
+            log.append(f"AI Action: Removed item matching '{act['name']}'")
             
         elif atype == "SET_STYLE" and "style" in act:
             if act["style"] in THEMES:
                 st.session_state.current_style = str(act["style"])
-                st.session_state.action_log.append(f"AI Action: Changed theme to '{act['style']}'")
+                log.append(f"AI Action: Changed theme to '{act['style']}'")
                 
         elif atype == "OPTIMIZE":
             # Smart Spatial Rearrange
-            for idx, item in enumerate(st.session_state.items):
+            for idx, item in enumerate(items):
                 cat = item.get("category", "")
                 if cat == "Workstation":
                     item["x"] = round(0.5 + (idx * 0.4), 2)
-                    item["y"] = round(max(0.5, room_l - safe_float(item.get("d"), 0.8) - 0.5), 2)
+                    item["y"] = round(max(0.5, room_l - item["d"] - 0.5), 2)
                 elif cat == "Seating":
                     item["x"] = 0.5
                     item["y"] = round(0.5 + (idx * 0.3), 2)
                 elif cat in ["Storage", "Fitness"]:
-                    item["x"] = round(max(0.5, room_w - safe_float(item.get("w"), 1.0) - 0.5), 2)
+                    item["x"] = round(max(0.5, room_w - item["w"] - 0.5), 2)
                     item["y"] = round(0.5 + (idx * 0.5), 2)
-            st.session_state.action_log.append("AI Action: Executed 1-Click Spatial Alignment Optimization")
+            log.append("AI Action: Executed 1-Click Spatial Alignment Optimization")
+            
+    st.session_state.items = sanitize_items_list(items)
 
 # ---------------------------------------------------------
 # TOP APP HEADER & BRAND BANNER
@@ -909,7 +952,7 @@ with col_m5:
     <div class="metric-card">
         <div class="metric-label">Budget Allocation</div>
         <div class="metric-value" style="color:#10B981;">${metrics['total_cost']}</div>
-        <div style="font-size:0.75rem; color:#A0AEC0;">Limit: ${st.session_state.budget} ({metrics['budget_pct']}%)</div>
+        <div style="font-size:0.75rem; color:#A0AEC0;">Limit: ${get_budget()} ({metrics['budget_pct']}%)</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -943,37 +986,42 @@ with st.sidebar:
             "width": safe_float(chosen["window"]["width"], 2.0)
         }
         st.session_state.items = sanitize_items_list(chosen["items"])
-        st.session_state.action_log.append(f"Loaded preset: '{preset_choice}'")
+        get_action_log().append(f"Loaded preset: '{preset_choice}'")
         st.rerun()
         
     st.markdown("---")
     
     # Room Blueprint Controls
     st.markdown("#### 📐 Room Dimensions & Blueprint")
+    room_dim = get_room_dim()
     c_w, c_l, c_h = st.columns(3)
     with c_w:
-        new_w = st.number_input("Width (m)", min_value=3.0, max_value=15.0, value=safe_float(st.session_state.room_dim["width"], 6.0), step=0.5)
+        new_w = st.number_input("Width (m)", min_value=3.0, max_value=15.0, value=room_dim["width"], step=0.5)
     with c_l:
-        new_l = st.number_input("Length (m)", min_value=3.0, max_value=15.0, value=safe_float(st.session_state.room_dim["length"], 5.0), step=0.5)
+        new_l = st.number_input("Length (m)", min_value=3.0, max_value=15.0, value=room_dim["length"], step=0.5)
     with c_h:
-        new_h = st.number_input("Height (m)", min_value=2.2, max_value=6.0, value=safe_float(st.session_state.room_dim["height"], 2.8), step=0.2)
+        new_h = st.number_input("Height (m)", min_value=2.2, max_value=6.0, value=room_dim["height"], step=0.2)
         
     st.session_state.room_dim["width"] = new_w
     st.session_state.room_dim["length"] = new_l
     st.session_state.room_dim["height"] = new_h
     
     # Door and Window
+    door = get_door()
+    window = get_window()
     col_d, col_w = st.columns(2)
     with col_d:
-        st.session_state.door["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(st.session_state.door.get("wall", "South")))
+        d_wall = door.get("wall", "South")
+        st.session_state.door["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(d_wall) if d_wall in ["South", "North", "East", "West"] else 0)
     with col_w:
-        st.session_state.window["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(st.session_state.window.get("wall", "North")))
+        w_wall = window.get("wall", "North")
+        st.session_state.window["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(w_wall) if w_wall in ["North", "South", "East", "West"] else 0)
         
     st.markdown("---")
     
     # Theme & Visual Style Selection
     st.markdown("#### 🎨 Theme & Aesthetic Style")
-    current_s = st.session_state.get("current_style", "⚡ Nike Performance Studio")
+    current_s = get_current_style()
     style_idx = list(THEMES.keys()).index(current_s) if current_s in THEMES else 0
     selected_style = st.selectbox("Current Theme Palette", list(THEMES.keys()), index=style_idx)
     st.session_state.current_style = selected_style
@@ -990,7 +1038,7 @@ with st.sidebar:
     
     # Budget Settings
     st.markdown("#### 💰 Target Budget ($)")
-    st.session_state.budget = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=safe_int(st.session_state.budget, 3500), step=250)
+    st.session_state.budget = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=get_budget(), step=250)
     
     st.markdown("---")
     
@@ -1046,14 +1094,15 @@ with tab1:
         with col_qa2:
             if st.button("🧹 Clear All Items", use_container_width=True):
                 st.session_state.items = []
-                st.session_state.action_log.append("Cleared all items from spatial layout.")
+                get_action_log().append("Cleared all items from spatial layout.")
                 st.rerun()
         with col_qa3:
             if st.button("📸 Save Snapshot", use_container_width=True):
-                snap_name = f"Snapshot #{len(st.session_state.snapshots)+1} ({len(st.session_state.items)} items)"
-                st.session_state.snapshots.append({
+                snaps = get_snapshots()
+                snap_name = f"Snapshot #{len(snaps)+1} ({len(get_items())} items)"
+                snaps.append({
                     "name": snap_name,
-                    "items": [item.copy() for item in st.session_state.items],
+                    "items": [item.copy() for item in get_items()],
                     "metrics": metrics.copy()
                 })
                 st.toast(f"Saved {snap_name}!")
@@ -1077,10 +1126,10 @@ with tab1:
                 
             c_ix, c_iy = st.columns(2)
             with c_ix:
-                max_x = max(0.0, safe_float(st.session_state.room_dim["width"])-0.5)
+                max_x = max(0.0, get_room_dim()["width"]-0.5)
                 item_x = st.number_input("X Pos (m)", min_value=0.0, max_value=float(max_x), value=min(1.0, float(max_x)), step=0.2)
             with c_iy:
-                max_y = max(0.0, safe_float(st.session_state.room_dim["length"])-0.5)
+                max_y = max(0.0, get_room_dim()["length"]-0.5)
                 item_y = st.number_input("Y Pos (m)", min_value=0.0, max_value=float(max_y), value=min(1.0, float(max_y)), step=0.2)
                 
             c_ic, c_ip = st.columns(2)
@@ -1101,29 +1150,33 @@ with tab1:
                     "zone": item_cat
                 })
                 if new_item:
-                    st.session_state.items.append(new_item)
-                    st.session_state.action_log.append(f"Added item '{item_name}' manually.")
+                    items = get_items()
+                    items.append(new_item)
+                    set_items(items)
+                    get_action_log().append(f"Added item '{item_name}' manually.")
                     st.success(f"Added '{item_name}' to layout!")
                     st.rerun()
                 
         elif editor_mode == "✏️ Edit Item":
             st.markdown("###### Select Item to Manipulate")
-            if not st.session_state.items:
+            current_items = get_items()
+            if not current_items:
                 st.info("No items currently in layout. Add an item first.")
             else:
-                item_options = {f"{item['name']} (ID:{item['id']})": idx for idx, item in enumerate(st.session_state.items)}
+                item_options = {f"{item['name']} (ID:{item['id']})": idx for idx, item in enumerate(current_items)}
                 selected_item_key = st.selectbox("Target Item", list(item_options.keys()))
                 idx = item_options[selected_item_key]
-                target_item = st.session_state.items[idx]
+                target_item = current_items[idx]
                 
-                room_w = safe_float(st.session_state.room_dim["width"], 6.0)
-                room_l = safe_float(st.session_state.room_dim["length"], 5.0)
+                room_dim = get_room_dim()
+                room_w = room_dim["width"]
+                room_l = room_dim["length"]
                 
-                max_sx = max(0.1, room_w - safe_float(target_item["w"], 1.0))
-                max_sy = max(0.1, room_l - safe_float(target_item["d"], 1.0))
+                max_sx = max(0.1, room_w - target_item["w"])
+                max_sy = max(0.1, room_l - target_item["d"])
                 
-                edit_x = st.slider("X Position (m)", 0.0, float(max_sx), min(float(max_sx), safe_float(target_item["x"])), step=0.1)
-                edit_y = st.slider("Y Position (m)", 0.0, float(max_sy), min(float(max_sy), safe_float(target_item["y"])), step=0.1)
+                edit_x = st.slider("X Position (m)", 0.0, float(max_sx), min(float(max_sx), target_item["x"]), step=0.1)
+                edit_y = st.slider("Y Position (m)", 0.0, float(max_sy), min(float(max_sy), target_item["y"]), step=0.1)
                 
                 target_item["x"] = round(edit_x, 2)
                 target_item["y"] = round(edit_y, 2)
@@ -1132,16 +1185,18 @@ with tab1:
                 with col_del:
                     if st.button("🗑️ Delete Item", use_container_width=True):
                         removed_name = target_item['name']
-                        st.session_state.items.pop(idx)
-                        st.session_state.action_log.append(f"Deleted item '{removed_name}'")
+                        current_items.pop(idx)
+                        set_items(current_items)
+                        get_action_log().append(f"Deleted item '{removed_name}'")
                         st.rerun()
                 with col_dup:
                     if st.button("📋 Duplicate", use_container_width=True):
                         dup_item = sanitize_item(target_item.copy())
                         dup_item["id"] = random.randint(1000, 9999)
                         dup_item["x"] = min(room_w - dup_item["w"], dup_item["x"] + 0.3)
-                        st.session_state.items.append(dup_item)
-                        st.session_state.action_log.append(f"Duplicated item '{target_item['name']}'")
+                        current_items.append(dup_item)
+                        set_items(current_items)
+                        get_action_log().append(f"Duplicated item '{target_item['name']}'")
                         st.rerun()
 
         elif editor_mode == "📋 Catalog Library":
@@ -1153,13 +1208,16 @@ with tab1:
                         st.markdown(f"**{cat_item['name']}** (${cat_item['price']}) — `{cat_item['category']}`")
                     with c_btn:
                         if st.button("➕ Add", key=f"cat_{cat_item['name']}"):
-                            room_w = safe_float(st.session_state.room_dim["width"], 6.0)
-                            room_l = safe_float(st.session_state.room_dim["length"], 5.0)
+                            room_dim = get_room_dim()
+                            room_w = room_dim["width"]
+                            room_l = room_dim["length"]
                             add_copy = sanitize_item(cat_item.copy())
                             add_copy["id"] = random.randint(1000, 9999)
                             add_copy["x"] = round(random.uniform(0.5, max(0.6, room_w - add_copy["w"] - 0.5)), 1)
                             add_copy["y"] = round(random.uniform(0.5, max(0.6, room_l - add_copy["d"] - 0.5)), 1)
-                            st.session_state.items.append(add_copy)
+                            current_items = get_items()
+                            current_items.append(add_copy)
+                            set_items(current_items)
                             st.toast(f"Added {cat_item['name']}!")
                             st.rerun()
 
@@ -1189,12 +1247,13 @@ with tab2:
 
     # Render Chat History
     chat_container = st.container()
+    history = get_chat_history()
     with chat_container:
-        for msg in st.session_state.chat_history:
-            if msg["role"] == "user":
-                st.markdown(f'<div class="chat-bubble-user"><strong>👤 You:</strong><br>{msg["content"]}</div>', unsafe_allow_html=True)
+        for msg in history:
+            if msg.get("role") == "user":
+                st.markdown(f'<div class="chat-bubble-user"><strong>👤 You:</strong><br>{msg.get("content","")}</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="chat-bubble-ai">{msg["content"]}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-bubble-ai">{msg.get("content","")}</div>', unsafe_allow_html=True)
 
     # Chat Input Box
     user_query = st.chat_input("Type your design instruction (e.g., 'Add a sofa in the lounge corner')...")
@@ -1202,12 +1261,12 @@ with tab2:
     active_prompt = quick_input or user_query
     
     if active_prompt:
-        st.session_state.chat_history.append({"role": "user", "content": active_prompt})
+        history.append({"role": "user", "content": active_prompt})
         
         with st.spinner("⚡ AURA AI is calculating spatial layouts..."):
             ai_response = process_ai_request(active_prompt)
             
-        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+        history.append({"role": "assistant", "content": ai_response})
         st.rerun()
 
 # ---------------------------------------------------------
@@ -1217,10 +1276,10 @@ with tab3:
     st.markdown("##### 📊 Comprehensive Spatial Intelligence & Ergonomics Report")
     
     c_an1, c_an2 = st.columns(2)
+    clean_items = get_items()
     
     with c_an1:
         st.markdown("###### 🎯 Category Budget Breakdown")
-        clean_items = sanitize_items_list(st.session_state.items)
         if clean_items:
             df_items = pd.DataFrame(clean_items)
             cat_summary = df_items.groupby("category")["price"].sum().reset_index()
@@ -1242,7 +1301,6 @@ with tab3:
 
     with c_an2:
         st.markdown("###### 🏛️ Spatial Zone Distribution")
-        clean_items = sanitize_items_list(st.session_state.items)
         if clean_items:
             df_items = pd.DataFrame(clean_items)
             df_items["area"] = df_items["w"] * df_items["d"]
@@ -1271,7 +1329,7 @@ with tab3:
     chk1 = "✅ Door Clearance: Walkway path clear from main entryway."
     chk2 = "✅ Natural Light Access: Primary desk workstation oriented toward window light vector."
     chk3 = "✅ Walkway Circulation: Over 45% open floor area maintained for movement." if metrics['spatial_utilization'] < 55 else "⚠️ High Density: Space utilization exceeds 55%. Consider clearing non-essential items."
-    chk4 = "✅ Budget Compliance: Current spend is within designated limit." if metrics['total_cost'] <= safe_float(st.session_state.budget, 3500) else "⚠️ Over Budget: Layout cost exceeds defined budget target."
+    chk4 = "✅ Budget Compliance: Current spend is within designated limit." if metrics['total_cost'] <= float(get_budget()) else "⚠️ Over Budget: Layout cost exceeds defined budget target."
     
     for chk in [chk1, chk2, chk3, chk4]:
         st.markdown(f"- {chk}")
@@ -1283,16 +1341,18 @@ with tab4:
     st.markdown("##### 🚀 Blueprint Specification Sheet & Export Hub")
     
     col_ex1, col_ex2 = st.columns([2, 1])
+    room_dim = get_room_dim()
+    current_items = get_items()
     
     with col_ex1:
         st.markdown("###### 📋 Project Design Summary Spec")
         
         spec_dict = {
             "Project Name": "AURA AI Spatial Design Blueprint",
-            "Theme Style": st.session_state.current_style,
-            "Room Dimensions": f"{st.session_state.room_dim['width']}m x {st.session_state.room_dim['length']}m x {st.session_state.room_dim['height']}m",
+            "Theme Style": get_current_style(),
+            "Room Dimensions": f"{room_dim['width']}m x {room_dim['length']}m x {room_dim['height']}m",
             "Total Floor Area": f"{metrics['total_room_area']} m²",
-            "Item Count": len(st.session_state.items),
+            "Item Count": len(current_items),
             "Ergonomic Rating": f"{metrics['ergo_score']}/100",
             "Aesthetic Harmony Rating": f"{metrics['aesthetic_score']}/100",
             "Total Furniture Cost": f"${metrics['total_cost']}"
@@ -1305,12 +1365,12 @@ with tab4:
         
         export_payload = {
             "app": "AURA Spatial AI Studio",
-            "room_dimensions": st.session_state.room_dim,
-            "style": st.session_state.current_style,
-            "door": st.session_state.door,
-            "window": st.session_state.window,
+            "room_dimensions": room_dim,
+            "style": get_current_style(),
+            "door": get_door(),
+            "window": get_window(),
             "metrics": metrics,
-            "items": sanitize_items_list(st.session_state.items)
+            "items": current_items
         }
         
         json_str = json.dumps(export_payload, indent=2)
@@ -1326,7 +1386,8 @@ with tab4:
         
         st.markdown("---")
         st.markdown("###### 📜 Applied AI Actions History")
-        for log in reversed(st.session_state.action_log[-8:]):
+        action_log = get_action_log()
+        for log in reversed(action_log[-8:]):
             st.caption(f"• {log}")
 
 # ---------------------------------------------------------
