@@ -168,51 +168,51 @@ PRESET_LAYOUTS = {
 }
 
 # ---------------------------------------------------------
-# SAFE STATE GETTERS & SETTERS (BULLETPROOF STATE ENGINE)
+# SAFE STATE GETTERS & SETTERS (AVOIDS st.session_state ATTRIBUTE COLLISION)
 # ---------------------------------------------------------
 def get_items():
-    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
+    if "spatial_items" not in st.session_state or not isinstance(st.session_state.get("spatial_items"), list):
         default_preset = PRESET_LAYOUTS["⚡ Nike Athletic Performance Studio"]
-        st.session_state.items = sanitize_items_list(default_preset["items"])
+        st.session_state["spatial_items"] = sanitize_items_list(default_preset["items"])
     else:
-        st.session_state.items = sanitize_items_list(st.session_state.items)
-    return st.session_state.items
+        st.session_state["spatial_items"] = sanitize_items_list(st.session_state["spatial_items"])
+    return st.session_state["spatial_items"]
 
 def set_items(new_items):
     if not isinstance(new_items, list):
-        st.session_state.items = []
+        st.session_state["spatial_items"] = []
     else:
-        st.session_state.items = sanitize_items_list(new_items)
+        st.session_state["spatial_items"] = sanitize_items_list(new_items)
 
 def get_room_dim():
-    if "room_dim" not in st.session_state or not isinstance(st.session_state.room_dim, dict):
-        st.session_state.room_dim = {"width": 6.0, "length": 5.0, "height": 2.8}
-    r = st.session_state.room_dim
+    if "room_dim" not in st.session_state or not isinstance(st.session_state.get("room_dim"), dict):
+        st.session_state["room_dim"] = {"width": 6.0, "length": 5.0, "height": 2.8}
+    r = st.session_state["room_dim"]
     r["width"] = max(3.0, min(15.0, safe_float(r.get("width"), 6.0)))
     r["length"] = max(3.0, min(15.0, safe_float(r.get("length"), 5.0)))
     r["height"] = max(2.2, min(6.0, safe_float(r.get("height"), 2.8)))
     return r
 
 def get_current_style():
-    if "current_style" not in st.session_state or not isinstance(st.session_state.current_style, str):
-        st.session_state.current_style = "⚡ Nike Performance Studio"
-    if st.session_state.current_style not in THEMES:
-        st.session_state.current_style = "⚡ Nike Performance Studio"
-    return st.session_state.current_style
+    if "current_style" not in st.session_state or not isinstance(st.session_state.get("current_style"), str):
+        st.session_state["current_style"] = "⚡ Nike Performance Studio"
+    if st.session_state["current_style"] not in THEMES:
+        st.session_state["current_style"] = "⚡ Nike Performance Studio"
+    return st.session_state["current_style"]
 
 def get_door():
-    if "door" not in st.session_state or not isinstance(st.session_state.door, dict):
-        st.session_state.door = {"wall": "South", "pos": 2.5, "width": 1.0}
-    d = st.session_state.door
+    if "door" not in st.session_state or not isinstance(st.session_state.get("door"), dict):
+        st.session_state["door"] = {"wall": "South", "pos": 2.5, "width": 1.0}
+    d = st.session_state["door"]
     d["wall"] = str(d.get("wall", "South"))
     d["pos"] = safe_float(d.get("pos"), 2.5)
     d["width"] = safe_float(d.get("width"), 1.0)
     return d
 
 def get_window():
-    if "window" not in st.session_state or not isinstance(st.session_state.window, dict):
-        st.session_state.window = {"wall": "North", "pos": 2.0, "width": 2.0}
-    w = st.session_state.window
+    if "window" not in st.session_state or not isinstance(st.session_state.get("window"), dict):
+        st.session_state["window"] = {"wall": "North", "pos": 2.0, "width": 2.0}
+    w = st.session_state["window"]
     w["wall"] = str(w.get("wall", "North"))
     w["pos"] = safe_float(w.get("pos"), 2.0)
     w["width"] = safe_float(w.get("width"), 2.0)
@@ -220,29 +220,29 @@ def get_window():
 
 def get_budget():
     if "budget" not in st.session_state:
-        st.session_state.budget = 3500
-    st.session_state.budget = max(1000, safe_int(st.session_state.budget, 3500))
-    return st.session_state.budget
+        st.session_state["budget"] = 3500
+    st.session_state["budget"] = max(1000, safe_int(st.session_state.get("budget"), 3500))
+    return st.session_state["budget"]
 
 def get_chat_history():
-    if "chat_history" not in st.session_state or not isinstance(st.session_state.chat_history, list):
-        st.session_state.chat_history = [
+    if "chat_history" not in st.session_state or not isinstance(st.session_state.get("chat_history"), list):
+        st.session_state["chat_history"] = [
             {
                 "role": "assistant",
                 "content": "⚡ **AURA AI Studio Co-Pilot active.** I am ready to help you optimize room flow, add items, adjust dimensions, and elevate your spatial design. Try asking: *'Add a standing desk near the window'* or *'Optimize layout for ergonomic score'*."
             }
         ]
-    return st.session_state.chat_history
+    return st.session_state["chat_history"]
 
 def get_action_log():
-    if "action_log" not in st.session_state or not isinstance(st.session_state.action_log, list):
-        st.session_state.action_log = ["Studio session initialized with Nike Performance Preset."]
-    return st.session_state.action_log
+    if "action_log" not in st.session_state or not isinstance(st.session_state.get("action_log"), list):
+        st.session_state["action_log"] = ["Studio session initialized with Nike Performance Preset."]
+    return st.session_state["action_log"]
 
 def get_snapshots():
-    if "snapshots" not in st.session_state or not isinstance(st.session_state.snapshots, list):
-        st.session_state.snapshots = []
-    return st.session_state.snapshots
+    if "snapshots" not in st.session_state or not isinstance(st.session_state.get("snapshots"), list):
+        st.session_state["snapshots"] = []
+    return st.session_state["snapshots"]
 
 def get_gemini_api_key():
     """Retrieve Gemini API key from session state, env vars, or Streamlit secrets."""
@@ -859,7 +859,7 @@ def execute_actions(actions):
             
         elif atype == "SET_STYLE" and "style" in act:
             if act["style"] in THEMES:
-                st.session_state.current_style = str(act["style"])
+                st.session_state["current_style"] = str(act["style"])
                 log.append(f"AI Action: Changed theme to '{act['style']}'")
                 
         elif atype == "OPTIMIZE":
@@ -877,7 +877,7 @@ def execute_actions(actions):
                     item["y"] = round(0.5 + (idx * 0.5), 2)
             log.append("AI Action: Executed 1-Click Spatial Alignment Optimization")
             
-    st.session_state.items = sanitize_items_list(items)
+    set_items(items)
 
 # ---------------------------------------------------------
 # TOP APP HEADER & BRAND BANNER
@@ -968,24 +968,24 @@ with st.sidebar:
     preset_choice = st.selectbox("⚡ Load Presets & Studio Templates", list(PRESET_LAYOUTS.keys()))
     if st.button("Apply Selected Preset Template", use_container_width=True, type="primary"):
         chosen = PRESET_LAYOUTS[preset_choice]
-        st.session_state.room_dim = {
+        st.session_state["room_dim"] = {
             "width": safe_float(chosen["room"]["width"], 6.0),
             "length": safe_float(chosen["room"]["length"], 5.0),
             "height": safe_float(chosen["room"]["height"], 2.8)
         }
-        st.session_state.current_style = str(chosen["style"])
-        st.session_state.budget = safe_int(chosen["budget"], 3500)
-        st.session_state.door = {
+        st.session_state["current_style"] = str(chosen["style"])
+        st.session_state["budget"] = safe_int(chosen["budget"], 3500)
+        st.session_state["door"] = {
             "wall": str(chosen["door"]["wall"]),
             "pos": safe_float(chosen["door"]["pos"], 2.5),
             "width": safe_float(chosen["door"]["width"], 1.0)
         }
-        st.session_state.window = {
+        st.session_state["window"] = {
             "wall": str(chosen["window"]["wall"]),
             "pos": safe_float(chosen["window"]["pos"], 2.0),
             "width": safe_float(chosen["window"]["width"], 2.0)
         }
-        st.session_state.items = sanitize_items_list(chosen["items"])
+        set_items(chosen["items"])
         get_action_log().append(f"Loaded preset: '{preset_choice}'")
         st.rerun()
         
@@ -1002,9 +1002,9 @@ with st.sidebar:
     with c_h:
         new_h = st.number_input("Height (m)", min_value=2.2, max_value=6.0, value=room_dim["height"], step=0.2)
         
-    st.session_state.room_dim["width"] = new_w
-    st.session_state.room_dim["length"] = new_l
-    st.session_state.room_dim["height"] = new_h
+    st.session_state["room_dim"]["width"] = new_w
+    st.session_state["room_dim"]["length"] = new_l
+    st.session_state["room_dim"]["height"] = new_h
     
     # Door and Window
     door = get_door()
@@ -1012,10 +1012,10 @@ with st.sidebar:
     col_d, col_w = st.columns(2)
     with col_d:
         d_wall = door.get("wall", "South")
-        st.session_state.door["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(d_wall) if d_wall in ["South", "North", "East", "West"] else 0)
+        st.session_state["door"]["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(d_wall) if d_wall in ["South", "North", "East", "West"] else 0)
     with col_w:
         w_wall = window.get("wall", "North")
-        st.session_state.window["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(w_wall) if w_wall in ["North", "South", "East", "West"] else 0)
+        st.session_state["window"]["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(w_wall) if w_wall in ["North", "South", "East", "West"] else 0)
         
     st.markdown("---")
     
@@ -1024,7 +1024,7 @@ with st.sidebar:
     current_s = get_current_style()
     style_idx = list(THEMES.keys()).index(current_s) if current_s in THEMES else 0
     selected_style = st.selectbox("Current Theme Palette", list(THEMES.keys()), index=style_idx)
-    st.session_state.current_style = selected_style
+    st.session_state["current_style"] = selected_style
     
     theme_meta = THEMES[selected_style]
     st.markdown(f"""
@@ -1038,7 +1038,7 @@ with st.sidebar:
     
     # Budget Settings
     st.markdown("#### 💰 Target Budget ($)")
-    st.session_state.budget = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=get_budget(), step=250)
+    st.session_state["budget"] = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=get_budget(), step=250)
     
     st.markdown("---")
     
@@ -1051,7 +1051,7 @@ with st.sidebar:
             
         user_key = st.text_input("Gemini API Key (Optional)", value=st.session_state.get("user_gemini_key", ""), type="password", placeholder="Paste API Key starting with AIza... or AQ...")
         if user_key:
-            st.session_state.user_gemini_key = user_key.strip()
+            st.session_state["user_gemini_key"] = user_key.strip()
             st.success("API Key stored in session!")
             st.rerun()
             
@@ -1093,7 +1093,7 @@ with tab1:
                 st.rerun()
         with col_qa2:
             if st.button("🧹 Clear All Items", use_container_width=True):
-                st.session_state.items = []
+                set_items([])
                 get_action_log().append("Cleared all items from spatial layout.")
                 st.rerun()
         with col_qa3:
@@ -1349,16 +1349,18 @@ with tab4:
         
         spec_dict = {
             "Project Name": "AURA AI Spatial Design Blueprint",
-            "Theme Style": get_current_style(),
+            "Theme Style": str(get_current_style()),
             "Room Dimensions": f"{room_dim['width']}m x {room_dim['length']}m x {room_dim['height']}m",
             "Total Floor Area": f"{metrics['total_room_area']} m²",
-            "Item Count": len(current_items),
+            "Item Count": str(len(current_items)),
             "Ergonomic Rating": f"{metrics['ergo_score']}/100",
             "Aesthetic Harmony Rating": f"{metrics['aesthetic_score']}/100",
             "Total Furniture Cost": f"${metrics['total_cost']}"
         }
         
-        st.table(pd.DataFrame(list(spec_dict.items()), columns=["Specification", "Value"]))
+        df_spec = pd.DataFrame(list(spec_dict.items()), columns=["Specification", "Value"])
+        df_spec["Value"] = df_spec["Value"].astype(str)
+        st.table(df_spec)
 
     with col_ex2:
         st.markdown("###### 💾 Export Data Files")
