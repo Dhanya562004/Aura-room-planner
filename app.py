@@ -15,6 +15,98 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 # ---------------------------------------------------------
+# DEFENSIVE TYPE CONVERSION HELPERS
+# ---------------------------------------------------------
+def safe_float(val, default=0.0):
+    """Safely convert any value to float, avoiding TypeError or ValueError crashes."""
+    if val is None:
+        return float(default)
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return float(default)
+
+def safe_int(val, default=0):
+    """Safely convert any value to int, avoiding TypeError or ValueError crashes."""
+    if val is None:
+        return int(default)
+    try:
+        return int(float(val))
+    except (ValueError, TypeError):
+        return int(default)
+
+def sanitize_item(item):
+    """Ensure item dictionary has valid float dimensions, position, and clean attributes."""
+    if not isinstance(item, dict):
+        return None
+    
+    w = max(0.1, safe_float(item.get("w"), 1.0))
+    d = max(0.1, safe_float(item.get("d"), 1.0))
+    x = max(0.0, safe_float(item.get("x"), 0.0))
+    y = max(0.0, safe_float(item.get("y"), 0.0))
+    price = max(0.0, safe_float(item.get("price"), 0.0))
+    
+    return {
+        "id": item.get("id", random.randint(1000, 9999)),
+        "name": str(item.get("name", "Spatial Element")),
+        "category": str(item.get("category", "Decor")),
+        "w": round(w, 2),
+        "d": round(d, 2),
+        "x": round(x, 2),
+        "y": round(y, 2),
+        "rotation": safe_int(item.get("rotation"), 0),
+        "color": str(item.get("color", "#CCFF00")),
+        "price": round(price, 2),
+        "zone": str(item.get("zone", item.get("category", "General")))
+    }
+
+def sanitize_items_list(items_list):
+    """Sanitize a list of item dictionaries."""
+    if not isinstance(items_list, list):
+        return []
+    result = []
+    for item in items_list:
+        clean = sanitize_item(item)
+        if clean is not None:
+            result.append(clean)
+    return result
+
+def get_gemini_api_key():
+    """Retrieve Gemini API key from session state, env vars, or Streamlit secrets."""
+    # 1. Check session state (user manual input in sidebar)
+    if st.session_state.get("user_gemini_key"):
+        key = str(st.session_state["user_gemini_key"]).strip()
+        if key:
+            return key
+            
+    # 2. Check environment variables
+    for env_var in ["GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_KEY"]:
+        if os.environ.get(env_var):
+            return os.environ.get(env_var).strip()
+            
+    # 3. Check Streamlit secrets (Cloud / local secrets.toml)
+    try:
+        if hasattr(st, "secrets") and st.secrets:
+            if "GEMINI_API_KEY" in st.secrets:
+                return str(st.secrets["GEMINI_API_KEY"]).strip()
+            elif "GOOGLE_API_KEY" in st.secrets:
+                return str(st.secrets["GOOGLE_API_KEY"]).strip()
+            elif "gemini_api_key" in st.secrets:
+                return str(st.secrets["gemini_api_key"]).strip()
+            elif "gemini" in st.secrets:
+                gemini_sec = st.secrets["gemini"]
+                if isinstance(gemini_sec, dict) and "api_key" in gemini_sec:
+                    return str(gemini_sec["api_key"]).strip()
+                elif isinstance(gemini_sec, str):
+                    return gemini_sec.strip()
+            elif "api_key" in st.secrets:
+                return str(st.secrets["api_key"]).strip()
+    except Exception:
+        pass
+        
+    return ""
+
+# ---------------------------------------------------------
 # PAGE CONFIGURATION & NIKE-LEVEL LUXURY DARK DESIGN SYSTEM
 # ---------------------------------------------------------
 st.set_page_config(
@@ -204,18 +296,6 @@ st.markdown("""
         margin: 8px 0;
         color: #F8FAFC;
     }
-
-    .action-chip {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        padding: 2px 8px;
-        font-size: 0.75rem;
-        color: #A0AEC0;
-        margin-right: 4px;
-        margin-top: 4px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -321,17 +401,32 @@ PRESET_LAYOUTS = {
 def init_session_state():
     default_preset = PRESET_LAYOUTS["⚡ Nike Athletic Performance Studio"]
     if "room_dim" not in st.session_state:
-        st.session_state.room_dim = default_preset["room"].copy()
+        st.session_state.room_dim = {
+            "width": safe_float(default_preset["room"]["width"], 6.0),
+            "length": safe_float(default_preset["room"]["length"], 5.0),
+            "height": safe_float(default_preset["room"]["height"], 2.8)
+        }
     if "current_style" not in st.session_state:
-        st.session_state.current_style = default_preset["style"]
+        st.session_state.current_style = str(default_preset["style"])
     if "items" not in st.session_state:
-        st.session_state.items = [item.copy() for item in default_preset["items"]]
+        st.session_state.items = sanitize_items_list(default_preset["items"])
+    else:
+        st.session_state.items = sanitize_items_list(st.session_state.items)
+        
     if "door" not in st.session_state:
-        st.session_state.door = default_preset["door"].copy()
+        st.session_state.door = {
+            "wall": str(default_preset["door"]["wall"]),
+            "pos": safe_float(default_preset["door"]["pos"], 2.5),
+            "width": safe_float(default_preset["door"]["width"], 1.0)
+        }
     if "window" not in st.session_state:
-        st.session_state.window = default_preset["window"].copy()
+        st.session_state.window = {
+            "wall": str(default_preset["window"]["wall"]),
+            "pos": safe_float(default_preset["window"]["pos"], 2.0),
+            "width": safe_float(default_preset["window"]["width"], 2.0)
+        }
     if "budget" not in st.session_state:
-        st.session_state.budget = default_preset["budget"]
+        st.session_state.budget = safe_int(default_preset["budget"], 3500)
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
             {
@@ -351,24 +446,30 @@ init_session_state()
 # ---------------------------------------------------------
 def calculate_metrics():
     room = st.session_state.room_dim
-    items = st.session_state.items
-    total_room_area = room["width"] * room["length"]
+    room_w = safe_float(room.get("width"), 6.0)
+    room_l = safe_float(room.get("length"), 5.0)
     
-    # Calculate item coverage
-    total_item_area = sum(item["w"] * item["d"] for item in items)
+    # Always sanitize items list to prevent float/int/str multiplication crashes
+    items = sanitize_items_list(st.session_state.get("items", []))
+    
+    total_room_area = room_w * room_l
+    
+    # Calculate item coverage with safe float values
+    total_item_area = sum(safe_float(item.get("w"), 1.0) * safe_float(item.get("d"), 1.0) for item in items)
     spatial_utilization = min(100, int((total_item_area / total_room_area) * 100)) if total_room_area > 0 else 0
     
     # Total cost
-    total_cost = sum(item.get("price", 0) for item in items)
-    budget_pct = min(100, int((total_cost / st.session_state.budget) * 100)) if st.session_state.budget > 0 else 0
+    total_cost = sum(safe_float(item.get("price"), 0.0) for item in items)
+    target_budget = max(1.0, safe_float(st.session_state.get("budget", 3500), 3500.0))
+    budget_pct = min(100, int((total_cost / target_budget) * 100))
     
-    # Ergonomics Score (Calculated based on item distribution and walkway clearance)
+    # Ergonomics Score
     workstation_count = sum(1 for item in items if item.get("category") == "Workstation")
     seating_count = sum(1 for item in items if item.get("category") == "Seating")
     
-    # Spatial penalty for overlapping or crowded center
-    center_x, center_y = room["width"] / 2.0, room["length"] / 2.0
-    crowded_center = sum(1 for item in items if abs(item["x"] - center_x) < 1.0 and abs(item["y"] - center_y) < 1.0)
+    # Spatial penalty for crowded center
+    center_x, center_y = room_w / 2.0, room_l / 2.0
+    crowded_center = sum(1 for item in items if abs(safe_float(item.get("x")) - center_x) < 1.0 and abs(safe_float(item.get("y")) - center_y) < 1.0)
     
     ergo_score = 92
     if spatial_utilization > 50:
@@ -395,7 +496,7 @@ def calculate_metrics():
         "spatial_utilization": spatial_utilization,
         "total_item_area": round(total_item_area, 2),
         "total_room_area": round(total_room_area, 2),
-        "total_cost": total_cost,
+        "total_cost": round(total_cost, 2),
         "budget_pct": budget_pct,
         "ergo_score": ergo_score,
         "aesthetic_score": aesthetic_score,
@@ -405,12 +506,16 @@ def calculate_metrics():
 # ---------------------------------------------------------
 # PLOTLY 2D FLOOR PLAN & 3D ISOMETRIC VISUALIZER
 # ---------------------------------------------------------
-def generate_2d_floorplan(view_mode="2D Grid"):
+def generate_2d_floorplan():
     room = st.session_state.room_dim
-    items = st.session_state.items
+    room_w = safe_float(room.get("width"), 6.0)
+    room_l = safe_float(room.get("length"), 5.0)
+    
+    items = sanitize_items_list(st.session_state.get("items", []))
     door = st.session_state.door
     window = st.session_state.window
-    current_style = st.session_state.current_style
+    
+    current_style = st.session_state.get("current_style", "⚡ Nike Performance Studio")
     theme_info = THEMES.get(current_style, THEMES["⚡ Nike Performance Studio"])
     
     fig = go.Figure()
@@ -418,65 +523,69 @@ def generate_2d_floorplan(view_mode="2D Grid"):
     # Room Outer Wall Boundary
     fig.add_shape(
         type="rect",
-        x0=0, y0=0, x1=room["width"], y1=room["length"],
+        x0=0, y0=0, x1=room_w, y1=room_l,
         line=dict(color=theme_info["accent"], width=3),
         fillcolor=theme_info["bg"],
         layer="below"
     )
     
     # Inner grid lines
-    for x in range(1, int(room["width"])):
-        fig.add_shape(type="line", x0=x, y0=0, x1=x, y1=room["length"], line=dict(color="rgba(255,255,255,0.05)", width=1, dash="dot"))
-    for y in range(1, int(room["length"])):
-        fig.add_shape(type="line", x0=0, y0=y, x1=room["width"], y1=y, line=dict(color="rgba(255,255,255,0.05)", width=1, dash="dot"))
+    for x in range(1, max(2, int(room_w))):
+        fig.add_shape(type="line", x0=x, y0=0, x1=x, y1=room_l, line=dict(color="rgba(255,255,255,0.05)", width=1, dash="dot"))
+    for y in range(1, max(2, int(room_l))):
+        fig.add_shape(type="line", x0=0, y0=y, x1=room_w, y1=y, line=dict(color="rgba(255,255,255,0.05)", width=1, dash="dot"))
     
     # Door Representation
     dw_color = "#FF5500"
-    if door["wall"] == "South":
-        dx0, dy0, dx1, dy1 = door["pos"], 0, door["pos"] + door["width"], 0
-    elif door["wall"] == "North":
-        dx0, dy0, dx1, dy1 = door["pos"], room["length"], door["pos"] + door["width"], room["length"]
-    elif door["wall"] == "West":
-        dx0, dy0, dx1, dy1 = 0, door["pos"], 0, door["pos"] + door["width"]
+    door_wall = door.get("wall", "South")
+    door_pos = safe_float(door.get("pos"), 2.5)
+    door_w = safe_float(door.get("width"), 1.0)
+    
+    if door_wall == "South":
+        dx0, dy0, dx1, dy1 = door_pos, 0, door_pos + door_w, 0
+    elif door_wall == "North":
+        dx0, dy0, dx1, dy1 = door_pos, room_l, door_pos + door_w, room_l
+    elif door_wall == "West":
+        dx0, dy0, dx1, dy1 = 0, door_pos, 0, door_pos + door_w
     else:
-        dx0, dy0, dx1, dy1 = room["width"], door["pos"], room["width"], door["pos"] + door["width"]
+        dx0, dy0, dx1, dy1 = room_w, door_pos, room_w, door_pos + door_w
         
-    fig.add_shape(
-        type="line", x0=dx0, y0=dy0, x1=dx1, y1=dy1,
-        line=dict(color=dw_color, width=8)
-    )
+    fig.add_shape(type="line", x0=dx0, y0=dy0, x1=dx1, y1=dy1, line=dict(color=dw_color, width=8))
     fig.add_annotation(x=(dx0+dx1)/2.0, y=(dy0+dy1)/2.0, text="🚪 DOOR", showarrow=False, font=dict(color=dw_color, size=10, family="Outfit"))
     
     # Window Representation
     win_color = "#00E5FF"
-    if window["wall"] == "North":
-        wx0, wy0, wx1, wy1 = window["pos"], room["length"], window["pos"] + window["width"], room["length"]
-    elif window["wall"] == "South":
-        wx0, wy0, wx1, wy1 = window["pos"], 0, window["pos"] + window["width"], 0
-    elif window["wall"] == "West":
-        wx0, wy0, wx1, wy1 = 0, window["pos"], 0, window["pos"] + window["width"]
+    win_wall = window.get("wall", "North")
+    win_pos = safe_float(window.get("pos"), 2.0)
+    win_w = safe_float(window.get("width"), 2.0)
+    
+    if win_wall == "North":
+        wx0, wy0, wx1, wy1 = win_pos, room_l, win_pos + win_w, room_l
+    elif win_wall == "South":
+        wx0, wy0, wx1, wy1 = win_pos, 0, win_pos + win_w, 0
+    elif win_wall == "West":
+        wx0, wy0, wx1, wy1 = 0, win_pos, 0, win_pos + win_w
     else:
-        wx0, wy0, wx1, wy1 = room["width"], window["pos"], room["width"], window["pos"] + window["width"]
+        wx0, wy0, wx1, wy1 = room_w, win_pos, room_w, win_pos + win_w
 
-    fig.add_shape(
-        type="line", x0=wx0, y0=wy0, x1=wx1, y1=wy1,
-        line=dict(color=win_color, width=6, dash="dash")
-    )
+    fig.add_shape(type="line", x0=wx0, y0=wy0, x1=wx1, y1=wy1, line=dict(color=win_color, width=6, dash="dash"))
     fig.add_annotation(x=(wx0+wx1)/2.0, y=(wy0+wy1)/2.0, text="🪟 WINDOW", showarrow=False, font=dict(color=win_color, size=10, family="Outfit"))
     
     # Furniture & Decor Items
     for item in items:
-        x0 = item["x"]
-        y0 = item["y"]
-        x1 = x0 + item["w"]
-        y1 = y0 + item["d"]
+        x0 = safe_float(item.get("x"), 0.0)
+        y0 = safe_float(item.get("y"), 0.0)
+        x1 = x0 + safe_float(item.get("w"), 1.0)
+        y1 = y0 + safe_float(item.get("d"), 1.0)
+        
+        item_color = item.get("color", theme_info["accent"])
         
         # Bounding shape
         fig.add_shape(
             type="rect",
             x0=x0, y0=y0, x1=x1, y1=y1,
-            line=dict(color=item.get("color", theme_info["accent"]), width=2),
-            fillcolor=item.get("color", theme_info["accent"]),
+            line=dict(color=item_color, width=2),
+            fillcolor=item_color,
             opacity=0.35,
             layer="above"
         )
@@ -490,7 +599,7 @@ def generate_2d_floorplan(view_mode="2D Grid"):
             "Storage": "📦", "Lighting": "💡", "Decor": "🌿"
         }.get(item.get("category"), "📌")
         
-        label_text = f"<b>{category_icon} {item['name']}</b><br><span style='font-size:9px;'>{item['w']}x{item['d']}m (${item.get('price',0)})</span>"
+        label_text = f"<b>{category_icon} {item.get('name', 'Item')}</b><br><span style='font-size:9px;'>{item['w']}x{item['d']}m (${item.get('price',0)})</span>"
         
         fig.add_annotation(
             x=cx, y=cy,
@@ -500,10 +609,9 @@ def generate_2d_floorplan(view_mode="2D Grid"):
             align="center"
         )
         
-    # Layout Layout Config
     fig.update_layout(
-        xaxis=dict(range=[-0.5, room["width"] + 0.5], showgrid=False, zeroline=False, title="Width (meters)", color="#94A3B8"),
-        yaxis=dict(range=[-0.5, room["length"] + 0.5], showgrid=False, zeroline=False, title="Length (meters)", scaleanchor="x", scaleratio=1, color="#94A3B8"),
+        xaxis=dict(range=[-0.5, room_w + 0.5], showgrid=False, zeroline=False, title="Width (meters)", color="#94A3B8"),
+        yaxis=dict(range=[-0.5, room_l + 0.5], showgrid=False, zeroline=False, title="Length (meters)", scaleanchor="x", scaleratio=1, color="#94A3B8"),
         margin=dict(l=30, r=30, t=30, b=30),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(11, 14, 20, 0.8)",
@@ -515,14 +623,18 @@ def generate_2d_floorplan(view_mode="2D Grid"):
 
 def generate_3d_spatial_map():
     room = st.session_state.room_dim
-    items = st.session_state.items
+    room_w = safe_float(room.get("width"), 6.0)
+    room_l = safe_float(room.get("length"), 5.0)
+    room_h = safe_float(room.get("height"), 2.8)
+    
+    items = sanitize_items_list(st.session_state.get("items", []))
     
     fig = go.Figure()
     
     # Draw floor plane
     fig.add_trace(go.Mesh3d(
-        x=[0, room["width"], room["width"], 0],
-        y=[0, 0, room["length"], room["length"]],
+        x=[0, room_w, room_w, 0],
+        y=[0, 0, room_l, room_l],
         z=[0, 0, 0, 0],
         color="#1E293B",
         opacity=0.4,
@@ -531,8 +643,11 @@ def generate_3d_spatial_map():
     
     # Draw items as 3D blocks
     for item in items:
-        x0, y0 = item["x"], item["y"]
-        x1, y1 = x0 + item["w"], y0 + item["d"]
+        x0 = safe_float(item.get("x"), 0.0)
+        y0 = safe_float(item.get("y"), 0.0)
+        x1 = x0 + safe_float(item.get("w"), 1.0)
+        y1 = y0 + safe_float(item.get("d"), 1.0)
+        
         h = 0.8 if item.get("category") == "Workstation" else (0.5 if item.get("category") == "Seating" else 1.2)
         
         fig.add_trace(go.Mesh3d(
@@ -544,14 +659,14 @@ def generate_3d_spatial_map():
             k=[0, 7, 5, 3, 6, 7, 1, 1, 5, 5, 7, 6],
             color=item.get("color", "#CCFF00"),
             opacity=0.7,
-            name=item["name"]
+            name=str(item.get("name", "Item"))
         ))
         
     fig.update_layout(
         scene=dict(
-            xaxis=dict(range=[0, room["width"]], title="X (m)"),
-            yaxis=dict(range=[0, room["length"]], title="Y (m)"),
-            zaxis=dict(range=[0, room["height"]], title="Height (m)"),
+            xaxis=dict(range=[0, room_w], title="X (m)"),
+            yaxis=dict(range=[0, room_l], title="Y (m)"),
+            zaxis=dict(range=[0, room_h], title="Height (m)"),
             aspectmode="data"
         ),
         margin=dict(l=0, r=0, t=0, b=0),
@@ -565,21 +680,21 @@ def generate_3d_spatial_map():
 # ---------------------------------------------------------
 def process_ai_request(user_prompt):
     """
-    Integrates Gemini 1.5 Flash API with fallback rule-based intelligence.
+    Integrates Gemini API with fallback rule-based intelligence.
     Extracts structure: text explanation + optional JSON action commands.
     """
     room = st.session_state.room_dim
-    items = st.session_state.items
-    current_style = st.session_state.current_style
+    items = sanitize_items_list(st.session_state.get("items", []))
+    current_style = st.session_state.get("current_style", "⚡ Nike Performance Studio")
     
-    api_key = os.environ.get("GEMINI_API_KEY") or st.session_state.get("user_gemini_key", "")
+    api_key = get_gemini_api_key()
     
     system_context = f"""
 You are AURA, an elite Nike-grade Spatial Design AI Assistant.
-Current Room Dimensions: {room['width']}m wide x {room['length']}m long.
+Current Room Dimensions: {room.get('width', 6.0)}m wide x {room.get('length', 5.0)}m long.
 Current Theme: {current_style}.
 Current Items in Room:
-{json.dumps([{ 'name': i['name'], 'category': i.get('category'), 'x': i['x'], 'y': i['y'], 'w': i['w'], 'd': i['d'] } for i in items], indent=2)}
+{json.dumps([{ 'name': i.get('name'), 'category': i.get('category'), 'x': i.get('x'), 'y': i.get('y'), 'w': i.get('w'), 'd': i.get('d') } for i in items], indent=2)}
 
 USER PROMPT: "{user_prompt}"
 
@@ -606,35 +721,48 @@ Here is my spatial suggestion...
     response_text = ""
     json_actions = []
     
-    # Attempt Gemini API
-    if GEMINI_AVAILABLE and api_key and len(api_key.strip()) > 5:
+    # Attempt Gemini API call safely
+    if GEMINI_AVAILABLE and api_key and len(api_key.strip()) > 3:
         try:
             genai.configure(api_key=api_key.strip())
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(system_context)
+            
+            # Try available model variants
+            model_names = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
+            response = None
+            for m_name in model_names:
+                try:
+                    model = genai.GenerativeModel(m_name)
+                    response = model.generate_content(system_context)
+                    if response and response.text:
+                        break
+                except Exception:
+                    continue
+                    
             if response and response.text:
                 response_text = response.text
                 
                 # Extract JSON block
                 json_match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
                 if json_match:
-                    parsed = json.loads(json_match.group(1))
-                    json_actions = parsed.get("actions", [])
+                    try:
+                        parsed = json.loads(json_match.group(1))
+                        json_actions = parsed.get("actions", [])
+                    except Exception:
+                        json_actions = []
                     # Clean out code block from text output for clean UI display
                     response_text = re.sub(r"```json\s*\{.*?\}\s*```", "", response_text, flags=re.DOTALL).strip()
         except Exception as e:
-            # Fallback to rule engine on API error
-            response_text = f"*(Gemini API notice: Switching to AURA Neural Rule Engine)* "
+            response_text = f"*(Gemini API notice: {str(e)[:60]}... Switching to AURA Neural Rule Engine)* "
     
     # Fallback Smart Rule-Based Engine
     if not response_text:
-        prompt_lower = user_prompt.lower()
+        prompt_lower = str(user_prompt).lower()
         
         if "desk" in prompt_lower or "workstation" in prompt_lower:
             response_text = "⚡ **AURA AI:** Added a high-performance Ergonomic Workstation aligned with optimal window lighting vectors and power routing clearance."
             json_actions = [{
                 "type": "ADD_ITEM",
-                "item": {"name": "Pro Ergonomic Desk", "category": "Workstation", "x": round(random.uniform(0.5, room['width']-2.0), 1), "y": round(random.uniform(0.5, room['length']-1.5), 1), "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 480}
+                "item": {"name": "Pro Ergonomic Desk", "category": "Workstation", "x": round(random.uniform(0.5, safe_float(room.get('width'),6.0)-2.0), 1), "y": round(random.uniform(0.5, safe_float(room.get('length'),5.0)-1.5), 1), "w": 1.6, "d": 0.8, "color": "#38BDF8", "price": 480}
             }]
         elif "nike" in prompt_lower or "fitness" in prompt_lower or "workout" in prompt_lower:
             response_text = "⚡ **AURA AI:** Integrated Nike Athletic Performance Recovery Zone including workout bench and interactive fitness mirror."
@@ -655,7 +783,7 @@ Here is my spatial suggestion...
             response_text = f"⚡ **AURA AI:** Analyzed your request regarding '{user_prompt}'. Recommended adding accent lighting and organizing items into dedicated zones for work, relaxation, and movement."
             json_actions = [{
                 "type": "ADD_ITEM",
-                "item": {"name": "Ambient Accent Lamp", "category": "Lighting", "x": 0.5, "y": round(room['length']-1.0, 1), "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 150}
+                "item": {"name": "Ambient Accent Lamp", "category": "Lighting", "x": 0.5, "y": round(safe_float(room.get('length'), 5.0)-1.0, 1), "w": 0.5, "d": 0.5, "color": "#FBBF24", "price": 150}
             }]
             
     # Execute parsed JSON actions into session state
@@ -664,48 +792,57 @@ Here is my spatial suggestion...
     return response_text
 
 def execute_actions(actions):
+    if not isinstance(actions, list):
+        return
     room = st.session_state.room_dim
+    room_w = safe_float(room.get("width"), 6.0)
+    room_l = safe_float(room.get("length"), 5.0)
+    
     for act in actions:
+        if not isinstance(act, dict):
+            continue
         atype = act.get("type")
         if atype == "ADD_ITEM" and "item" in act:
-            new_item = act["item"]
-            new_item["id"] = random.randint(1000, 9999)
-            # Ensure within room boundaries
-            new_item["x"] = max(0.2, min(room["width"] - new_item["w"] - 0.2, new_item.get("x", 1.0)))
-            new_item["y"] = max(0.2, min(room["length"] - new_item["d"] - 0.2, new_item.get("y", 1.0)))
-            st.session_state.items.append(new_item)
-            st.session_state.action_log.append(f"AI Action: Added item '{new_item['name']}'")
+            raw_item = act["item"]
+            clean_item = sanitize_item(raw_item)
+            if clean_item:
+                clean_item["x"] = max(0.2, min(room_w - clean_item["w"] - 0.2, clean_item["x"]))
+                clean_item["y"] = max(0.2, min(room_l - clean_item["d"] - 0.2, clean_item["y"]))
+                st.session_state.items.append(clean_item)
+                st.session_state.action_log.append(f"AI Action: Added item '{clean_item['name']}'")
             
         elif atype == "REMOVE_ITEM" and "name" in act:
-            target = act["name"].lower()
-            st.session_state.items = [i for i in st.session_state.items if target not in i["name"].lower()]
+            target = str(act["name"]).lower()
+            st.session_state.items = [i for i in st.session_state.items if target not in str(i.get("name","")).lower()]
             st.session_state.action_log.append(f"AI Action: Removed item matching '{act['name']}'")
             
         elif atype == "SET_STYLE" and "style" in act:
             if act["style"] in THEMES:
-                st.session_state.current_style = act["style"]
+                st.session_state.current_style = str(act["style"])
                 st.session_state.action_log.append(f"AI Action: Changed theme to '{act['style']}'")
                 
         elif atype == "OPTIMIZE":
             # Smart Spatial Rearrange
-            # Place workstations near top wall (North), seating in middle, storage along side wall
             for idx, item in enumerate(st.session_state.items):
                 cat = item.get("category", "")
                 if cat == "Workstation":
-                    item["x"] = 0.5 + (idx * 0.4)
-                    item["y"] = max(0.5, room["length"] - item["d"] - 0.5)
+                    item["x"] = round(0.5 + (idx * 0.4), 2)
+                    item["y"] = round(max(0.5, room_l - safe_float(item.get("d"), 0.8) - 0.5), 2)
                 elif cat == "Seating":
                     item["x"] = 0.5
-                    item["y"] = 0.5 + (idx * 0.3)
-                elif cat == "Storage" or cat == "Fitness":
-                    item["x"] = max(0.5, room["width"] - item["w"] - 0.5)
-                    item["y"] = 0.5 + (idx * 0.5)
+                    item["y"] = round(0.5 + (idx * 0.3), 2)
+                elif cat in ["Storage", "Fitness"]:
+                    item["x"] = round(max(0.5, room_w - safe_float(item.get("w"), 1.0) - 0.5), 2)
+                    item["y"] = round(0.5 + (idx * 0.5), 2)
             st.session_state.action_log.append("AI Action: Executed 1-Click Spatial Alignment Optimization")
 
 # ---------------------------------------------------------
 # TOP APP HEADER & BRAND BANNER
 # ---------------------------------------------------------
-st.markdown("""
+api_active = bool(get_gemini_api_key())
+ai_badge_text = "🤖 GEMINI 1.5 FLASH (ACTIVE)" if api_active else "⚡ NEURAL RULE ENGINE (ACTIVE)"
+
+st.markdown(f"""
 <div class="aura-header">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
         <div>
@@ -718,7 +855,7 @@ st.markdown("""
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <span class="status-badge badge-active">🟢 ENGINE READY</span>
-            <span class="status-badge badge-ai">🤖 GEMINI 1.5 FLASH CO-PILOT</span>
+            <span class="status-badge badge-ai">{ai_badge_text}</span>
         </div>
     </div>
 </div>
@@ -788,12 +925,24 @@ with st.sidebar:
     preset_choice = st.selectbox("⚡ Load Presets & Studio Templates", list(PRESET_LAYOUTS.keys()))
     if st.button("Apply Selected Preset Template", use_container_width=True, type="primary"):
         chosen = PRESET_LAYOUTS[preset_choice]
-        st.session_state.room_dim = chosen["room"].copy()
-        st.session_state.current_style = chosen["style"]
-        st.session_state.budget = chosen["budget"]
-        st.session_state.door = chosen["door"].copy()
-        st.session_state.window = chosen["window"].copy()
-        st.session_state.items = [item.copy() for item in chosen["items"]]
+        st.session_state.room_dim = {
+            "width": safe_float(chosen["room"]["width"], 6.0),
+            "length": safe_float(chosen["room"]["length"], 5.0),
+            "height": safe_float(chosen["room"]["height"], 2.8)
+        }
+        st.session_state.current_style = str(chosen["style"])
+        st.session_state.budget = safe_int(chosen["budget"], 3500)
+        st.session_state.door = {
+            "wall": str(chosen["door"]["wall"]),
+            "pos": safe_float(chosen["door"]["pos"], 2.5),
+            "width": safe_float(chosen["door"]["width"], 1.0)
+        }
+        st.session_state.window = {
+            "wall": str(chosen["window"]["wall"]),
+            "pos": safe_float(chosen["window"]["pos"], 2.0),
+            "width": safe_float(chosen["window"]["width"], 2.0)
+        }
+        st.session_state.items = sanitize_items_list(chosen["items"])
         st.session_state.action_log.append(f"Loaded preset: '{preset_choice}'")
         st.rerun()
         
@@ -803,11 +952,11 @@ with st.sidebar:
     st.markdown("#### 📐 Room Dimensions & Blueprint")
     c_w, c_l, c_h = st.columns(3)
     with c_w:
-        new_w = st.number_input("Width (m)", min_value=3.0, max_value=15.0, value=float(st.session_state.room_dim["width"]), step=0.5)
+        new_w = st.number_input("Width (m)", min_value=3.0, max_value=15.0, value=safe_float(st.session_state.room_dim["width"], 6.0), step=0.5)
     with c_l:
-        new_l = st.number_input("Length (m)", min_value=3.0, max_value=15.0, value=float(st.session_state.room_dim["length"]), step=0.5)
+        new_l = st.number_input("Length (m)", min_value=3.0, max_value=15.0, value=safe_float(st.session_state.room_dim["length"], 5.0), step=0.5)
     with c_h:
-        new_h = st.number_input("Height (m)", min_value=2.2, max_value=6.0, value=float(st.session_state.room_dim["height"]), step=0.2)
+        new_h = st.number_input("Height (m)", min_value=2.2, max_value=6.0, value=safe_float(st.session_state.room_dim["height"], 2.8), step=0.2)
         
     st.session_state.room_dim["width"] = new_w
     st.session_state.room_dim["length"] = new_l
@@ -816,15 +965,17 @@ with st.sidebar:
     # Door and Window
     col_d, col_w = st.columns(2)
     with col_d:
-        st.session_state.door["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(st.session_state.door["wall"]))
+        st.session_state.door["wall"] = st.selectbox("Door Wall", ["South", "North", "East", "West"], index=["South", "North", "East", "West"].index(st.session_state.door.get("wall", "South")))
     with col_w:
-        st.session_state.window["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(st.session_state.window["wall"]))
+        st.session_state.window["wall"] = st.selectbox("Window Wall", ["North", "South", "East", "West"], index=["North", "South", "East", "West"].index(st.session_state.window.get("wall", "North")))
         
     st.markdown("---")
     
     # Theme & Visual Style Selection
     st.markdown("#### 🎨 Theme & Aesthetic Style")
-    selected_style = st.selectbox("Current Theme Palette", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.current_style) if st.session_state.current_style in THEMES else 0)
+    current_s = st.session_state.get("current_style", "⚡ Nike Performance Studio")
+    style_idx = list(THEMES.keys()).index(current_s) if current_s in THEMES else 0
+    selected_style = st.selectbox("Current Theme Palette", list(THEMES.keys()), index=style_idx)
     st.session_state.current_style = selected_style
     
     theme_meta = THEMES[selected_style]
@@ -839,17 +990,24 @@ with st.sidebar:
     
     # Budget Settings
     st.markdown("#### 💰 Target Budget ($)")
-    st.session_state.budget = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=st.session_state.budget, step=250)
+    st.session_state.budget = st.slider("Max Budget ($)", min_value=1000, max_value=10000, value=safe_int(st.session_state.budget, 3500), step=250)
     
     st.markdown("---")
     
     # Gemini API Configuration
-    with st.expander("🔑 Gemini AI API Settings"):
-        user_key = st.text_input("Gemini API Key (Optional)", value=st.session_state.get("user_gemini_key", ""), type="password")
+    with st.expander("🔑 Gemini AI API Settings", expanded=not api_active):
+        active_key = get_gemini_api_key()
+        if active_key:
+            masked_key = active_key[:5] + "..." + active_key[-4:] if len(active_key) > 9 else "******"
+            st.success(f"Key Detected: `{masked_key}`")
+            
+        user_key = st.text_input("Gemini API Key (Optional)", value=st.session_state.get("user_gemini_key", ""), type="password", placeholder="Paste API Key starting with AIza... or AQ...")
         if user_key:
-            st.session_state.user_gemini_key = user_key
-            st.success("API key stored in session!")
-        st.caption("If no API key is provided, AURA Neural Rule Engine automatically takes over seamlessly.")
+            st.session_state.user_gemini_key = user_key.strip()
+            st.success("API Key stored in session!")
+            st.rerun()
+            
+        st.caption("AURA detects API keys automatically from Streamlit Secrets (`GEMINI_API_KEY`), environment variables, or manual input above.")
 
 # ---------------------------------------------------------
 # MAIN WORKSPACE - 4 TAB INTERFACE
@@ -895,7 +1053,7 @@ with tab1:
                 snap_name = f"Snapshot #{len(st.session_state.snapshots)+1} ({len(st.session_state.items)} items)"
                 st.session_state.snapshots.append({
                     "name": snap_name,
-                    "items": [i.copy() for i in st.session_state.items],
+                    "items": [item.copy() for item in st.session_state.items],
                     "metrics": metrics.copy()
                 })
                 st.toast(f"Saved {snap_name}!")
@@ -919,9 +1077,11 @@ with tab1:
                 
             c_ix, c_iy = st.columns(2)
             with c_ix:
-                item_x = st.number_input("X Pos (m)", min_value=0.0, max_value=float(st.session_state.room_dim["width"])-0.5, value=1.0, step=0.2)
+                max_x = max(0.0, safe_float(st.session_state.room_dim["width"])-0.5)
+                item_x = st.number_input("X Pos (m)", min_value=0.0, max_value=float(max_x), value=min(1.0, float(max_x)), step=0.2)
             with c_iy:
-                item_y = st.number_input("Y Pos (m)", min_value=0.0, max_value=float(st.session_state.room_dim["length"])-0.5, value=1.0, step=0.2)
+                max_y = max(0.0, safe_float(st.session_state.room_dim["length"])-0.5)
+                item_y = st.number_input("Y Pos (m)", min_value=0.0, max_value=float(max_y), value=min(1.0, float(max_y)), step=0.2)
                 
             c_ic, c_ip = st.columns(2)
             with c_ic:
@@ -930,7 +1090,7 @@ with tab1:
                 item_price = st.number_input("Price ($)", min_value=0, value=250, step=25)
                 
             if st.button("Add Item to Layout", type="primary", use_container_width=True):
-                new_item = {
+                new_item = sanitize_item({
                     "id": random.randint(1000, 9999),
                     "name": item_name,
                     "category": item_cat,
@@ -939,11 +1099,12 @@ with tab1:
                     "color": item_color,
                     "price": item_price,
                     "zone": item_cat
-                }
-                st.session_state.items.append(new_item)
-                st.session_state.action_log.append(f"Added item '{item_name}' manually.")
-                st.success(f"Added '{item_name}' to layout!")
-                st.rerun()
+                })
+                if new_item:
+                    st.session_state.items.append(new_item)
+                    st.session_state.action_log.append(f"Added item '{item_name}' manually.")
+                    st.success(f"Added '{item_name}' to layout!")
+                    st.rerun()
                 
         elif editor_mode == "✏️ Edit Item":
             st.markdown("###### Select Item to Manipulate")
@@ -955,8 +1116,14 @@ with tab1:
                 idx = item_options[selected_item_key]
                 target_item = st.session_state.items[idx]
                 
-                edit_x = st.slider("X Position (m)", 0.0, float(st.session_state.room_dim["width"] - target_item["w"]), float(target_item["x"]), step=0.1)
-                edit_y = st.slider("Y Position (m)", 0.0, float(st.session_state.room_dim["length"] - target_item["d"]), float(target_item["y"]), step=0.1)
+                room_w = safe_float(st.session_state.room_dim["width"], 6.0)
+                room_l = safe_float(st.session_state.room_dim["length"], 5.0)
+                
+                max_sx = max(0.1, room_w - safe_float(target_item["w"], 1.0))
+                max_sy = max(0.1, room_l - safe_float(target_item["d"], 1.0))
+                
+                edit_x = st.slider("X Position (m)", 0.0, float(max_sx), min(float(max_sx), safe_float(target_item["x"])), step=0.1)
+                edit_y = st.slider("Y Position (m)", 0.0, float(max_sy), min(float(max_sy), safe_float(target_item["y"])), step=0.1)
                 
                 target_item["x"] = round(edit_x, 2)
                 target_item["y"] = round(edit_y, 2)
@@ -970,9 +1137,9 @@ with tab1:
                         st.rerun()
                 with col_dup:
                     if st.button("📋 Duplicate", use_container_width=True):
-                        dup_item = target_item.copy()
+                        dup_item = sanitize_item(target_item.copy())
                         dup_item["id"] = random.randint(1000, 9999)
-                        dup_item["x"] = min(st.session_state.room_dim["width"]-dup_item["w"], dup_item["x"] + 0.3)
+                        dup_item["x"] = min(room_w - dup_item["w"], dup_item["x"] + 0.3)
                         st.session_state.items.append(dup_item)
                         st.session_state.action_log.append(f"Duplicated item '{target_item['name']}'")
                         st.rerun()
@@ -986,10 +1153,12 @@ with tab1:
                         st.markdown(f"**{cat_item['name']}** (${cat_item['price']}) — `{cat_item['category']}`")
                     with c_btn:
                         if st.button("➕ Add", key=f"cat_{cat_item['name']}"):
-                            add_copy = cat_item.copy()
+                            room_w = safe_float(st.session_state.room_dim["width"], 6.0)
+                            room_l = safe_float(st.session_state.room_dim["length"], 5.0)
+                            add_copy = sanitize_item(cat_item.copy())
                             add_copy["id"] = random.randint(1000, 9999)
-                            add_copy["x"] = round(random.uniform(0.5, st.session_state.room_dim["width"] - add_copy["w"] - 0.5), 1)
-                            add_copy["y"] = round(random.uniform(0.5, st.session_state.room_dim["length"] - add_copy["d"] - 0.5), 1)
+                            add_copy["x"] = round(random.uniform(0.5, max(0.6, room_w - add_copy["w"] - 0.5)), 1)
+                            add_copy["y"] = round(random.uniform(0.5, max(0.6, room_l - add_copy["d"] - 0.5)), 1)
                             st.session_state.items.append(add_copy)
                             st.toast(f"Added {cat_item['name']}!")
                             st.rerun()
@@ -1033,7 +1202,6 @@ with tab2:
     active_prompt = quick_input or user_query
     
     if active_prompt:
-        # Append User Message
         st.session_state.chat_history.append({"role": "user", "content": active_prompt})
         
         with st.spinner("⚡ AURA AI is calculating spatial layouts..."):
@@ -1052,8 +1220,9 @@ with tab3:
     
     with c_an1:
         st.markdown("###### 🎯 Category Budget Breakdown")
-        if st.session_state.items:
-            df_items = pd.DataFrame(st.session_state.items)
+        clean_items = sanitize_items_list(st.session_state.items)
+        if clean_items:
+            df_items = pd.DataFrame(clean_items)
             cat_summary = df_items.groupby("category")["price"].sum().reset_index()
             fig_pie = px.pie(
                 cat_summary, values="price", names="category",
@@ -1073,8 +1242,9 @@ with tab3:
 
     with c_an2:
         st.markdown("###### 🏛️ Spatial Zone Distribution")
-        if st.session_state.items:
-            df_items = pd.DataFrame(st.session_state.items)
+        clean_items = sanitize_items_list(st.session_state.items)
+        if clean_items:
+            df_items = pd.DataFrame(clean_items)
             df_items["area"] = df_items["w"] * df_items["d"]
             zone_summary = df_items.groupby("category")["area"].sum().reset_index()
             fig_bar = px.bar(
@@ -1101,7 +1271,7 @@ with tab3:
     chk1 = "✅ Door Clearance: Walkway path clear from main entryway."
     chk2 = "✅ Natural Light Access: Primary desk workstation oriented toward window light vector."
     chk3 = "✅ Walkway Circulation: Over 45% open floor area maintained for movement." if metrics['spatial_utilization'] < 55 else "⚠️ High Density: Space utilization exceeds 55%. Consider clearing non-essential items."
-    chk4 = "✅ Budget Compliance: Current spend is within designated limit." if metrics['total_cost'] <= st.session_state.budget else "⚠️ Over Budget: Layout cost exceeds defined budget target."
+    chk4 = "✅ Budget Compliance: Current spend is within designated limit." if metrics['total_cost'] <= safe_float(st.session_state.budget, 3500) else "⚠️ Over Budget: Layout cost exceeds defined budget target."
     
     for chk in [chk1, chk2, chk3, chk4]:
         st.markdown(f"- {chk}")
@@ -1140,7 +1310,7 @@ with tab4:
             "door": st.session_state.door,
             "window": st.session_state.window,
             "metrics": metrics,
-            "items": st.session_state.items
+            "items": sanitize_items_list(st.session_state.items)
         }
         
         json_str = json.dumps(export_payload, indent=2)
